@@ -1,3 +1,5 @@
+
+const mongoose = require("mongoose");
 const Rent=require("../Modules/RentModule");
 const User=require("../Modules/UserModule");
 const Renter=require("../Modules/RenterModule");
@@ -18,7 +20,9 @@ async function createRent(req, res) {
     } catch (error) {
         res.status(400).send(error.message);
     }
-}async function addAccessory(req, res) {
+}
+
+async function addAccessory(req, res) {
     try {
         const { userId, renterId } = req.params; 
         if (!req.body.rentDate) {
@@ -33,11 +37,14 @@ async function createRent(req, res) {
         const inputDate = new Date(req.body.rentDate).toISOString();  // המרת התאריך לפורמט ISO
         
         // בדוק אם התאריך תפוס
-        const dateExists = accessory.accessoryRent.some(rent => {
-            const rentDate = new Date(rent.date).toISOString();
-            return rentDate === inputDate && 
-                   rent.renter.toString() === renterId; // בדיקה ישירה מול השוכר
-        });
+      const dateExists = accessory.accessoryRent.some(rent => {
+      const rentDate = new Date(rent.date);
+      const rentReturnDate = new Date(rent.returnDate); // הנחה שיש תאריך החזרה
+      const inputDate = new Date(inputDate); // הנחה ש-inputDate הוא תאריך קלט
+
+    return (inputDate >= rentDate && inputDate <= rentReturnDate) && 
+           rent.renter.toString() === renterId; // בדיקה ישירה מול השוכר
+});
 
         if (dateExists) {  // אם נמצא תאריך תפוס, הימנע מהוספה
             return res.status(409).send("תאריך זה כבר תפוס עבור השוכר.");
@@ -57,7 +64,7 @@ async function createRent(req, res) {
 
         // הוספה למערך המוצרים בהזמנה
         rent.rentAccessories.push(req.body.accessoryId);
-        rent.rentRenter.push(renterId);
+        rent.rentRenter = renterId; 
         await rent.save();
 
         // עדכון השוכרים
@@ -85,8 +92,16 @@ async function getAllRents(req, res) {
         res.status(400).send(error.message);
     }
 }
-
-const mongoose = require("mongoose");
+async function getRentsByRenter(req, res) {
+    const { renterId } = req.params; 
+    try {
+        const rents = await Rent.find({rentRenter:renterId}).populate('rentUser').populate('rentAccessories').populate('rentRenter');
+        res.status(200).send({ rents: rents });
+    } catch (error) {
+        console.error(error); 
+        res.status(400).send(error.message);
+    }
+}
 
 async function deleteRent(req, res) {
     try {
@@ -104,8 +119,8 @@ async function deleteRent(req, res) {
         }
 
         // עדכון טבלת Renters
-        await Renter.updateMany(
-            { renterRents: rentId },
+        await Renter.updateOne(
+            { renterRent: rentId },
             { $pull: { renterRents: rentId } }
         );
 
@@ -134,6 +149,7 @@ async function deleteRent(req, res) {
         res.status(400).send(error.message);
     }
 }
+
 async function updateRent(req, res) {
     try {
         const rentId = req.params.id; 
@@ -189,9 +205,4 @@ async function removeAccessory(req, res) {
     }
 }
 
-
-
-
-
-
-module.exports={ deleteRent,createRent,addAccessory,getAllRents,updateRent,removeAccessory}
+module.exports={ deleteRent,createRent,addAccessory,getAllRents,updateRent,removeAccessory,getRentsByRenter}
