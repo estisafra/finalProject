@@ -1,5 +1,5 @@
 const _ = require('lodash');
-
+const mongoose = require('mongoose');
 const Accessory=require("../Modules/AccessoryModule")
 const Renters = require("../Modules/RenterModule");
 const Rent=require("../Modules/RentModule");
@@ -57,6 +57,38 @@ async function getAccessoryByGallery(req,res){
            res.status(404).send(null);
         }
         else res.status(200).send(accessory);
+    } catch (error) {
+        res.status(500).send(error.message);
+    }
+}
+async function getAccessoryByRenter(req, res) {
+    try {
+        const { renterId } = req.params;
+
+        const renterObjectId =new  mongoose.Types.ObjectId(renterId);
+
+        const accessories = await Accessory.find({
+            'accessoryRenter.renter': renterObjectId
+        });
+
+        if (!accessories || accessories.length === 0) {
+            return res.status(404).send("No accessories found for this renter.");
+        }
+
+       
+        const filteredAccessories = accessories.map(accessory => {
+            const renterInfo = accessory.accessoryRenter.find(renter =>
+                renter.renter.equals(renterObjectId)
+            );
+
+            return {
+                accessoryName: accessory.accessoryName,
+                price: renterInfo?.price || null,
+                image: renterInfo?.image || null
+            };
+        });
+
+        res.status(200).send(filteredAccessories);
     } catch (error) {
         res.status(500).send(error.message);
     }
@@ -137,4 +169,4 @@ async function deleteAccessoryFromRenter(req, res) {
 
 
 
-module.exports={createAccessory,deleteAccessory,getAccessoryByGallery,updateAccessory,deleteAccessoryFromRenter,getAccessoryRentersDetails,getAllAccessory}
+module.exports={createAccessory,getAccessoryByRenter,deleteAccessory,getAccessoryByGallery,updateAccessory,deleteAccessoryFromRenter,getAccessoryRentersDetails,getAllAccessory}

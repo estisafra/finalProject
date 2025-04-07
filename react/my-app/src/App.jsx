@@ -3,6 +3,8 @@ import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
 import PhotographyOrders from './Components/PhotographyOrders'
+import RenterRents from './Components/RenterRents'
+import RenterAccessories from './Components/RenterAccessories'
 
 function App() {
   const [count, setCount] = useState(0)
@@ -29,7 +31,9 @@ function App() {
       <p className="read-the-docs">
         Click on the Vite and React logos to learn more
       </p>
-      <PhotographyOrders/>
+      {/* <RenterRents/>
+      <PhotographyOrders/> */}
+      <RenterAccessories/>
     </>
   )
 }
