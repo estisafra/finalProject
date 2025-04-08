@@ -1,8 +1,11 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { useSelector } from 'react-redux';
+import { Link } from "react-router-dom";
+import AddAccessory from "./AddAccessory";
 const  RenterAccessories = () => {
     const[accessories, setAccessories] = useState([])
+    const [showAddAccessory, setShowAddAccessory] = useState(false);
     //  const id = useSelector((state) => state.user.id); 
      const id="67ea7200d3d21caf4dd0f6a2"
         useEffect(() => {
@@ -17,11 +20,17 @@ const  RenterAccessories = () => {
                     });
             }
         }, []);
+        if (showAddAccessory) {
+          
+           return <AddAccessory/>
+        }
     
     return(
         
         <div>
-            <h1>Rener rents</h1>
+           <button onClick={() => setShowAddAccessory(true)}>to add accessory</button>
+        
+            <h1>Rener Accessories</h1>
             <ul>
             <ul>
            {accessories.map((accessory, index) => (

@@ -21,6 +21,7 @@ const  RenterRents = () => {
     return(
         
         <div>
+            
             <h1>Rener rents</h1>
             <ul>
             <ul>
@@ -29,8 +30,9 @@ const  RenterRents = () => {
             Rent User: {rent.rentUser?.userName || "Unknown User"}  <br />
             rent Date: {new Date(rent.rentDate).toLocaleDateString()}
            </li>
+         
     ))}
-</ul>
+            </ul>
             </ul>
         </div>
     )

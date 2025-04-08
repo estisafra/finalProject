@@ -39,28 +39,47 @@ async function updatePersonalDetails(req, res)  {
         res.status(500).send(error.message);
     }
 }
-async function addAccessory(req,res){
-  let{renterId}=req.params;
-  let name=req.body.accessoryName;
-  let accessory= await Accessory.findOne({accessoryName:name})
-  if(!accessory)
-     accessory= await createAccessory(req, res);
-  let renterDoc = await Renter.findById(renterId); 
-  if (!renterDoc) {
-      return res.status(404).send('Renter not found');
-  }
+async function addAccessory(req, res) {
+    try {
+        const { renterId } = req.params;
+        const { accessoryName, price } = req.body;
+        const image = req.file ? req.file.path : null; // נתיב התמונה שהועלתה
 
-     renterDoc.renterAccessory.push({
-      accessory: accessory._id,
-   
-  });
+        // בדיקה אם האביזר כבר קיים
+        let accessory = await Accessory.findOne({ accessoryName });
+        if (!accessory) {
+            accessory = new Accessory({
+                accessoryName,
+                accessoryRenter: [],
+                accessoryRent: [],
+            });
+            await accessory.save();
+        }
 
-  accessory.accessoryRenter.push({ renter: renterDoc._id , price: req.body.price,image:req.body.image});
+        // בדיקה אם המשכיר קיים
+        const renterDoc = await Renter.findById(renterId);
+        if (!renterDoc) {
+            return res.status(404).send("Renter not found");
+        }
 
-  await renterDoc.save(); 
-  await accessory.save(); 
-  res.status(200).send({ message: 'Accessory added successfully' });
+        // הוספת האביזר למשכיר
+        renterDoc.renterAccessory.push({
+            accessory: accessory._id,
+        });
 
-}
+        // הוספת המשכיר לאביזר
+        accessory.accessoryRenter.push({
+            renter: renterDoc._id,
+            price,
+            image,
+        });
 
-module.exports={createRenter,getRenterById,addAccessory,updatePersonalDetails}
+        await renterDoc.save();
+        await accessory.save();
+
+        res.status(200).send({ message: "Accessory added successfully", accessory });
+    } catch (error) {
+        console.error("Error adding accessory:", error);
+        res.status(500).send(error.message);
+    }
+}module.exports={createRenter,getRenterById,addAccessory,updatePersonalDetails}
