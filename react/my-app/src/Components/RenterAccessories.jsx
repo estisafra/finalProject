@@ -37,7 +37,7 @@ const  RenterAccessories = () => {
            <li key={index}>
              accessory Name: {accessory.accessoryName}  <br />
              accessory Price: {accessory. price} <br />
-             {/* accesorry image: <img src={accessory.image} alt="accessory" /> <br /> */}
+             <img src={`http://localhost:8080${accessory.image}`} alt="accessory" style={{ width: "100px", height: "auto" }}/>
            </li>
     ))}
 </ul>

@@ -2,17 +2,27 @@ const _ = require('lodash');
 
 const User=require('../Modules/UserModule')
 const bcrypt = require("bcryptjs");
- async function createUser(req, res)  {
-    try {
-        const user = new User(req.body);
-        const hashedPassword = await bcrypt.hash(user.userPassword, 10);
-        user.userPassword = hashedPassword;
-        await user.save();
-        res.status(201).send({ id: user._id });
-    } catch (error) {
-        res.status(400).send(error.message);
-    }
-}
+
+ async function createUser(req, res) {
+            try {
+                const user = new User(req.body);
+        
+                // הצפנת הסיסמה
+                const hashedPassword = await bcrypt.hash(user.userPassword, 10);
+                user.userPassword = hashedPassword;
+        
+                // שמירת המשתמש במסד הנתונים
+                await user.save();
+        
+                // החזרת המשתמש שנוצר
+                return user;
+            } catch (error) {
+                // החזרת שגיאה אם יש בעיה
+                throw new Error(error.message);
+            }
+        }
+
+
 
 async function getUserById(req, res)  {
     try {

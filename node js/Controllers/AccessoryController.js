@@ -84,7 +84,7 @@ async function getAccessoryByRenter(req, res) {
             return {
                 accessoryName: accessory.accessoryName,
                 price: renterInfo?.price || null,
-                image: renterInfo?.image || null
+                image: renterInfo?.image ? `/uploads/${renterInfo.image.replace(/^uploads[\\/]/, '')}` : null
             };
         });
 

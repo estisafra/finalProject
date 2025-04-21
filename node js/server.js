@@ -36,6 +36,7 @@ app.use("/Rent", rentRouter);
 app.use("/Renter", renterRouter);
 app.use("/User", userRouter);
 app.use("/System", systemRouter);
+app.use("/uploads", express.static("uploads"));
 
 // הפעלת השרת
 app.listen(8080, () => {
