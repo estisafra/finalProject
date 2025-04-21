@@ -11,5 +11,5 @@ router.get("/getRenterById/:_id",verifyToken,getRenterById)
 //מקבל בbody 
 router.put("/updatePersonalDetails/:_id",verifyToken,updatePersonalDetails)
 //מקבל בbody פרטים ליצירת acvessory
-router.put("/addAccessory/:renterId",verifyToken, upload.single("allImages"),addAccessory)
+router.put("/addAccessory/:renterId",verifyToken, upload.single("image"),addAccessory)
 module.exports = router

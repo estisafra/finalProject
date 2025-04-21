@@ -8,6 +8,6 @@ const { login, register } = require("../Middleware/authenticataion");
 // ראוטים
 router.post("/sendEmails", sendEmails);
 router.post("/login", login); // הוספת ראוט עבור login
-router.post("/register",upload.array("images"), register); // הוספת ראוט עבור register
+router.post("/register",upload.array("allImages"), register); // הוספת ראוט עבור register
 
 module.exports = router;
