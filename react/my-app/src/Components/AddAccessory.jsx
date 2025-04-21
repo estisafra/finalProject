@@ -12,7 +12,7 @@ const AddAccessory = () => {
     
         const formData = new FormData();
         formData.append("accessoryName", name);
-        formData.append("image", image); // שליחת התמונה כקובץ
+        formData.append("image", image); 
         formData.append("price", price);
     
         axios.put(`http://localhost:8080/Renter/addAccessory/${id}`, formData, {

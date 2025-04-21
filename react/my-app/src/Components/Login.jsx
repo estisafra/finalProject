@@ -1,9 +1,15 @@
 import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom"; // ייבוא useNavigate
+import { useDispatch,useSelector } from "react-redux"; // ייבוא useDispatch
+import { saveUser } from "../Store/UserSlice"; // עדכן את הנתיב לפי הצורך
+
 
 const Login = () => {
     const navigate = useNavigate(); // הגדרת navigate
+    const dispatch = useDispatch(); 
+    const userSlice = useSelector((state) => state.user);
+
 
     const handleRoleSelection = (selectedRole) => {
         if (selectedRole === "Photographer") {
@@ -36,8 +42,25 @@ const Login = () => {
                 },
             });
             console.log("Login successful:", response.data);
+            let myName=""
+            switch (response.data.role) {
+                case "User": myName = response.data.user.userName;
+                    break;
+                case "Renter": myName = response.data.user.renterName;
+                    break;
+                case "Photography": myName = response.data.user.photographyName;
+                    break;
+            }
+            
+            dispatch(saveUser({
+                name: myName || name, // אם יש שם מהתגובה, השתמש בו, אחרת השתמש בשם מהקלט
+                id: response.data.user._id, // הנח שיש id מהתגובה
+                role: response.data.role // הנח שיש role מהתגובה
+            }));
             alert("Login successful!");
+
             setShowRoleSelection(false); // הסתרת כפתורי התפקיד במקרה של הצלחה
+
         } catch (error) {
             if (error.response && (error.response.status === 400 || error.response.status === 404)) {
                 console.error("Error during login:", error.response.data);
@@ -49,7 +72,7 @@ const Login = () => {
             }
         }
     };
-
+ 
     return (
         <div>
             <h1>Login</h1>

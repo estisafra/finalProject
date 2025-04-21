@@ -6,8 +6,6 @@ require("dotenv").config();
 
 const app = express(); // הגדרת app חייבת להיות לפני השימוש בו
 
-
-
 app.use(cors());
 app.options("*", cors()); // טיפול בבקשות OPTIONS לכל הנתיבים
 app.use(express.json());

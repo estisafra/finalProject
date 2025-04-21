@@ -1,18 +1,27 @@
 const Renter=require("../Modules/RenterModule");
 const Accessory=require("../Modules/AccessoryModule")
 const { createAccessory } = require("../Controllers/AccessoryController");
+const bcrypt = require("bcryptjs");
 
 const _ = require('lodash');
 
-async function createRenter(req, res)  {
+async function createRenter(req, res) {
     try {
         const renter = new Renter(req.body);
+
+        const hashedPassword = await bcrypt.hash(renter.renterPassword, 10);
+        renter.renterPassword = hashedPassword;
         await renter.save();
-        res.status(201).send({ id:renter._id });
+
+        // החזרת המידע של השוכר שנוצר
+        return renter; // להחזיר את האובייקט renter
     } catch (error) {
-        res.status(400).send(error.mesnsage);
+        console.error("Error during registration:", error.message);
+        throw new Error(error.message); // לזרוק שגיאה
     }
 }
+
+
 async function getRenterById(req,res){
     try {
             const {_id} = req.params;

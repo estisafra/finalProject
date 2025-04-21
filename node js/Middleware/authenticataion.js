@@ -10,16 +10,25 @@ async function login(req, res) {
     try {
         const { email, password} = req.body;
          userType=""
-        if( User.findOne({userPassword:password,userMail:email})!=null)
-            userType="User"
-        else
-        if( Renter.findOne({renterPassword:password,renterMail:email})!=null)
-              userType="Renter"
-          
-        else
-        if( Photography.findOne({PhotographyrPassword:password,PhotographyMail:email})!=null)
-              userType="Photography"
-
+         let user = await User.findOne({ userMail: email });
+         if (user && await bcrypt.compare(password, user.userPassword)) {
+             userType = "User";
+         }
+         if (!userType) {
+            user = await Renter.findOne({ renterMail: email });
+            if (user && await bcrypt.compare(password, user.renterPassword)) {
+                userType = "Renter";
+            }
+        }
+    
+        // חיפוש משתמש מסוג Photography
+        if (!userType) {
+            user = await Photography.findOne({ PhotographyMail: email });
+            if (user && await bcrypt.compare(password, user.photographyPassword)) {
+                userType = "Photography";
+            }
+        }
+    
         // בדוק אם סוג המשתמש סופק
         if (!userType || !["User", "Renter", "Photography"].includes(userType)) {
             return res.status(400).send("המשתמש לא קיים");
@@ -27,16 +36,16 @@ async function login(req, res) {
 
         // מיפוי בין סוג המשתמש למודל ולשדה הסיסמה
         const userMapping = {
-            User: { model: User, passwordField: "userPassword" },
-            Renter: { model: Renter, passwordField: "renterPassword" },
-            Photography: { model: Photography, passwordField: "photographyPassword" },
+            User: { model: User, passwordField: "userPassword" ,emailField:"userMail"},
+            Renter: { model: Renter, passwordField: "renterPassword" ,emailField:"renterMail"},
+            Photography: { model: Photography, passwordField: "photographyPassword" ,emailField:"photographyMail"},
         };
 
         // קבל את המודל ושם השדה המתאים
-        const { model: Model, passwordField } = userMapping[userType];
+        const { model: Model, passwordField ,emailField} = userMapping[userType];
         console.log(Model, passwordField);
         // מצא את המשתמש לפי אימייל
-        const user = await Model.findOne({ userMail: email });
+        user = await Model.findOne({ [emailField]: email });
         if (!user) {
             return res.status(404).send("משתמש לא נמצא.");
         }
@@ -54,7 +63,7 @@ async function login(req, res) {
             { expiresIn: "99h" }            // תוקף ה-Token
         );
 
-        res.status(200).send({ token });
+        res.status(200).send({ token,user,role:userType });
     } catch (error) {
         res.status(500).send(error.message);
     }
@@ -83,12 +92,34 @@ async function register(req, res) {
                 req.body.userAddress=req.body.address;
                 user = await createUser(req, res);
                 break;
-            case "Photography":
-                console.log("Creating Photography...");
-                user = await createPhotography(req, res);
-                break;
+                case "Photography":
+                    const images = req.files.map((file) => ({
+                        url: `/uploads/${file.filename}`,
+                        gallery: req.body.galeries.find((gallery) => gallery.name === file.gallery)?.name || "Unknown",
+                    }))
+                    console.log("Creating Photography...");
+                    req.body.photographyPassword = password;
+                    req.body.photographyMail = email;
+                    req.body.photographyName = req.body.name;
+                    req.body.photographyPhone = req.body.phone;
+                    req.body.photographyAddress = req.body.address;
+                    
+                    // הוספת השדות החדשים
+                    req.body.photographyLink = req.body.link;
+                    req.body.photographyImages = req.body.images; // מערך של תמונות
+                    req.body.photographyGaleries = req.body.galeries; // מערך של גלריות
+                    req.body.photographyResponse = req.body.response; // מערך של תגובות
+                
+                    user = await createPhotography(req, res);
+                    break;
+                
             case "Renter":
                 console.log("Creating Renter...");
+                req.body.renterPassword = password;
+                req.body.renterMail = email;
+                req.body.renterName=req.body.name;
+                req.body.renterPhone=req.body.phone;
+                req.body.renterAddress=req.body.address;
                 user = await createRenter(req, res);
                 break;
             default:
@@ -113,13 +144,13 @@ async function register(req, res) {
 
         console.log("JWT Token created:", token);
 
-        res.status(201).send({ message: "משתמש נוצר בהצלחה.", token });
+        res.status(201).send({ message: "משתמש נוצר בהצלחה.", token ,user});
     } catch (error) {
         console.error("Error during registration:", error); // לוג של השגיאה
         res.status(500).send(error.message);
     }
 }
-function authenticateToken(req, res, next) {
+function verifyToken(req, res, next) {
     const authHeader = req.headers.authorization;
     const token = authHeader && authHeader.split(" ")[1];
 
@@ -136,4 +167,4 @@ function authenticateToken(req, res, next) {
         next();
     });
 }
-module.exports = { login ,register, authenticateToken };
+module.exports = { login ,register, verifyToken };

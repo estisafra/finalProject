@@ -3,21 +3,25 @@ const moment = require('moment');
 const Photography = require("../Modules/PhotographyModule");
 const Users = require("../Modules/UserModule");
 const Orders = require("../Modules/OrderModule");
+const bcrypt = require("bcryptjs");
 
 
 const createPhotography = async (req, res) => {
-    const { photographyPassword, photographyName, photographyAddress, photographyMail, photographyPhone, photographyPrice, photographyLink } = req.body;
-    // בדיקות קלט
-    // if (!photographyPassword || !photographyName || !photographyAddress || !photographyMail || !photographyPrice || !photographyLink) {
-    //     return res.status(400).send("כל השדות הם חובה.");
-    // }
+    
+ 
     try {
+
         const newPhotography = new Photography(req.body);
+
+        const hashedPassword = await bcrypt.hash(photography.photographyPassword, 10);
+        photography.photographyPassword = hashedPassword;
         await newPhotography.save();
-        res.status(201).send(newPhotography);
-    } catch (error) {
-        res.status(400).send(error.message);
-    }
+
+        return photography;
+            } catch (error) {
+                // החזרת שגיאה אם יש בעיה
+                throw new Error(error.message);
+            }
 };
 
 const getAllPhotography = async (req, res) => {

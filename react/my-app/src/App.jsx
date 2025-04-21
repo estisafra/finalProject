@@ -3,6 +3,7 @@ import Login from "./Components/Login";
 import RegisterPhotography from "./Components/RegisterPhotography";
 import RegisterRenter from "./Components/RegisterRenter";
 import RegisterUser from "./Components/RegisterUser";
+import RenterAccessories from "./Components/RenterAccessories";
 
 function App() {
   return (
@@ -12,6 +13,7 @@ function App() {
       <Route path="/register-renter" element={<RegisterRenter />} />
       <Route path="/register-user" element={<RegisterUser />} />
     </Routes>
+    // <RenterAccessories/>
   );
 }
 

@@ -24,6 +24,7 @@ const PhotographyModule = mongoose.Schema({
         maxPrice: { type: Number, required: true }
     }],
     photographyOrders: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Orders' }],
+    
     photographyResponse: [{ type: String }], 
     photographyLink: {
         type: String,
