@@ -4,10 +4,10 @@ const RenterHome = () => {
     return (
         <>
             <h1>Renter Home</h1>
-            <Link to="/renteraccessories">
+            <Link to="/renterAccessories">
                 <button>Go to Renter Accessories</button>
             </Link>
-            <Link to="/renterrents">
+            <Link to="/renterRents">
                 <button>Go to Renter Rents</button>
             </Link>
         </>

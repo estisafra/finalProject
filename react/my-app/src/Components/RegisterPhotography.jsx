@@ -3,11 +3,13 @@ import { useLocation } from "react-router-dom";
 import axios from "axios";
 import { useDispatch } from "react-redux"; 
 import { saveUser } from "../Store/UserSlice"; 
+import { useNavigate } from "react-router-dom";
 
 const RegisterPhotography = () => {
     const location = useLocation();
     const dispatch = useDispatch(); 
     const { name, email, password } = location.state || {};
+    const navigate=useNavigate()
 
     const [address, setAddress] = useState("");
     const [phone, setPhone] = useState("");
@@ -116,6 +118,8 @@ const RegisterPhotography = () => {
                     role: "User",
                 })
             );
+
+            navigate("/photographyHome");
         } catch (error) {
             console.error("Error during registration:", error);
             alert("Registration failed. Please try again.");

@@ -65,8 +65,12 @@ const Login = () => {
             localStorage.setItem('token', token);
             // ניתוב לקומפוננטת RenterHome במקרה של הצלחה
             if (response.data.role === "Renter") {
-                navigate("/renterhome");
+                navigate("/renterHome");
             }
+            else if (response.data.role === "User") {
+                navigate("/userHome");
+            }
+            else navigate("/photographyHome");
 
             setShowRoleSelection(false); // הסתרת כפתורי התפקיד במקרה של הצלחה
         } catch (error) {

@@ -43,7 +43,7 @@ const RegisterRenter = () => {
             }));
 
             // ניתוב לקומפוננטת RenterHome
-            navigate("/renterhome");
+            navigate("/renterHome");
         } catch (error) {
             console.error("Error during registration:", error);
             alert("Registration failed. Please try again.");

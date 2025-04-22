@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { useLocation } from "react-router-dom";
+import {useLocation } from "react-router-dom";
 import axios from "axios";
 import { useDispatch,useSelector } from "react-redux"; // ייבוא useDispatch
 import { saveUser } from "../Store/UserSlice"; // עדכן את הנתיב לפי הצורך
+import { useNavigate } from "react-router-dom";
 
 
 const RegisterUser = () => {
@@ -10,6 +11,7 @@ const RegisterUser = () => {
     const dispatch = useDispatch(); 
     const userSlice = useSelector((state) => state.user);
     const { name, email, password } = location.state || {}; // קבלת הפרטים מה-props
+    const navigate=useNavigate()
 
     const [address, setAddress] = useState("");
     const [phone, setPhone] = useState("");
@@ -39,6 +41,8 @@ const RegisterUser = () => {
                 id: response.data.user._id, // הנח שיש id מהתגובה
                 role:registerData.userType // הנח שיש role מהתגובה
             }));
+
+            navigate("/userHome");
 
         } catch (error) {
             console.error("Error during registration:", error);

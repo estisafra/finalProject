@@ -2,15 +2,15 @@
 import axios from "axios";
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom"; // Import useNavigate
-import RenterAccessories from "./RenterAccessories";
+import { useNavigate } from "react-router-dom"; 
+
 const AddAccessory = () => {
     const [name, setName] = useState("");
     const [image, setImage] = useState(null);
     const [price, setPrice] = useState("");
     const [isReady, setIsReady] = useState(false);
     const id = useSelector((state) => state.user.id);
-    const navigate = useNavigate(); // Initialize useNavigate
+    const navigate = useNavigate();
 
     useEffect(() => {
         if (id) {
