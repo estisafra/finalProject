@@ -1,14 +1,15 @@
 const express = require("express")
 const router = express.Router()
 const { createAccessory,deleteAccessory,getAccessoryByGallery,getAccessoryByRenter,updateAccessory,deleteAccessoryFromRenter,getAccessoryRentersDetails,getAllAccessory} = require("../Controllers/AccessoryController")
+const { verifyToken } = require("../Middleware/authenticataion");
 
 router.post("/createAccessory",createAccessory)
-router.delete("/deleteAccessory/:id",deleteAccessory)
-router.get("/getAllAccessory",getAllAccessory)
-router.get("/getAccessoryByGallery/:gallery",getAccessoryByGallery)
-router.get("/getAccessoryRentersDetails/:accessoryId",getAccessoryRentersDetails)
+router.delete("/deleteAccessory/:id",verifyToken,deleteAccessory)
+router.get("/getAllAccessory",verifyToken,getAllAccessory)
+router.get("/getAccessoryByGallery/:gallery",verifyToken,getAccessoryByGallery)
+router.get("/getAccessoryRentersDetails/:accessoryId",verifyToken,getAccessoryRentersDetails)
 router.get("/getAccessoryByRenter/:renterId",getAccessoryByRenter)
-router.put("/updateAccessory/:id",updateAccessory)
-router.put("/deleteAccessoryFromRenter/:renterid",deleteAccessoryFromRenter)
+router.put("/updateAccessory/:id",verifyToken,updateAccessory)
+router.put("/deleteAccessoryFromRenter/:renterid",verifyToken,deleteAccessoryFromRenter)
 
 module.exports=router

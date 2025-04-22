@@ -1,18 +1,21 @@
+
 import axios from "axios";
 import { useState, useEffect } from "react";
-import { useSelector } from "react-redux"; // ייבוא useSelector
-
+import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom"; // Import useNavigate
+import RenterAccessories from "./RenterAccessories";
 const AddAccessory = () => {
     const [name, setName] = useState("");
     const [image, setImage] = useState(null);
     const [price, setPrice] = useState("");
-    const [isReady, setIsReady] = useState(false); // מצב לוודא שה-id נטען
-    const id = useSelector((state) => state.user.id); // קבלת ה-id מה-slice
+    const [isReady, setIsReady] = useState(false);
+    const id = useSelector((state) => state.user.id);
+    const navigate = useNavigate(); // Initialize useNavigate
 
     useEffect(() => {
         if (id) {
             console.log("Renter ID loaded:", id);
-            setIsReady(true); // עדכון המצב כאשר ה-id נטען
+            setIsReady(true);
         }
     }, [id]);
 
@@ -29,20 +32,23 @@ const AddAccessory = () => {
         formData.append("image", image); 
         formData.append("price", price);
 
-        const token = localStorage.getItem("token"); // קבלת ה-token מה-localStorage
+        const token = localStorage.getItem("token");
         console.log("Token:", token);
         axios.put(`http://localhost:8080/Renter/addAccessory/${id}`, formData, {
             headers: {
                 "Content-Type": "multipart/form-data",
-                "Authorization": `Bearer ${token}`, // הוספת ה-token לכותרת Authorization
+                "Authorization": `Bearer ${token}`,
             },
         })
             .then((response) => {
                 console.log("Accessory added:", response.data);
                 alert("Accessory added successfully!");
+               
                 setName("");
                 setImage(null);
                 setPrice("");
+                // <RenterAccessories/>
+
             })
             .catch((error) => {
                 console.error("Error adding accessory:", error);

@@ -1,14 +1,15 @@
 const express = require("express")
 const router = express.Router()
 const { deleteRent,createRent,addAccessory,getAllRents,updateRent,removeAccessory,getRentsByRenter} = require("../Controllers/RentController")
+const {  verifyToken } = require("../Middleware/authenticataion");
 
 router.post("/createRent/userId",createRent)
-router.delete("/deleteRent/:rentId",deleteRent)
-router.get("/getAllRents",getAllRents)
+router.delete("/deleteRent/:rentId",verifyToken,deleteRent)
+router.get("/getAllRents",verifyToken,getAllRents)
 // וdateמקבל idמוצר בבודי
-router.put("/addAccessory/:userId/:renterId",addAccessory)
-router.put("/removeAccessory/:userId/:renterId",removeAccessory)
+router.put("/addAccessory/:userId/:renterId",verifyToken,addAccessory)
+router.put("/removeAccessory/:userId/:renterId",verifyToken,removeAccessory)
 //body- date
-router.put("/updateRent/:id",updateRent)
-router.get("/getRentsByRenter/:renterId",getRentsByRenter)
+router.put("/updateRent/:id",verifyToken,updateRent)
+router.get("/getRentsByRenter/:renterId",verifyToken,getRentsByRenter)
 module.exports = router

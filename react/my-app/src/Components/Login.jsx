@@ -9,6 +9,16 @@ const Login = () => {
     const dispatch = useDispatch();
     const userSlice = useSelector((state) => state.user);
 
+
+    const handleRoleSelection = (selectedRole) => {
+        if (selectedRole === "Photographer") {
+            navigate("/register-photography", { state: { name, email, password } });
+        } else if (selectedRole === "Renter") {
+            navigate("/register-renter", { state: { name, email, password } });
+        } else if (selectedRole === "User") {
+            navigate("/register-user", { state: { name, email, password } });
+        }
+    };
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
