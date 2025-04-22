@@ -1,23 +1,40 @@
 import axios from "axios";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSelector } from "react-redux"; // ייבוא useSelector
 
 const AddAccessory = () => {
     const [name, setName] = useState("");
     const [image, setImage] = useState(null);
     const [price, setPrice] = useState("");
-    const id = "67ea7200d3d21caf4dd0f6a2"; // מזהה המשכיר
+    const [isReady, setIsReady] = useState(false); // מצב לוודא שה-id נטען
+    const id = useSelector((state) => state.user.id); // קבלת ה-id מה-slice
+
+    useEffect(() => {
+        if (id) {
+            console.log("Renter ID loaded:", id);
+            setIsReady(true); // עדכון המצב כאשר ה-id נטען
+        }
+    }, [id]);
 
     const handleSubmit = (e) => {
         e.preventDefault();
-    
+
+        if (!isReady) {
+            alert("ID is not ready yet. Please try again.");
+            return;
+        }
+
         const formData = new FormData();
         formData.append("accessoryName", name);
         formData.append("image", image); 
         formData.append("price", price);
-    
+
+        const token = localStorage.getItem("token"); // קבלת ה-token מה-localStorage
+        console.log("Token:", token);
         axios.put(`http://localhost:8080/Renter/addAccessory/${id}`, formData, {
             headers: {
                 "Content-Type": "multipart/form-data",
+                "Authorization": `Bearer ${token}`, // הוספת ה-token לכותרת Authorization
             },
         })
             .then((response) => {
@@ -32,7 +49,6 @@ const AddAccessory = () => {
                 alert("Failed to add accessory.");
             });
     };
-    
 
     return (
         <div>
@@ -68,7 +84,7 @@ const AddAccessory = () => {
                         required
                     />
                 </div>
-                <button type="submit">Add Accessory</button>
+                <button type="submit" disabled={!isReady}>Add Accessory</button>
             </form>
         </div>
     );

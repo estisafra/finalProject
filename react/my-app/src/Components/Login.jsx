@@ -1,25 +1,13 @@
 import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom"; // ייבוא useNavigate
-import { useDispatch,useSelector } from "react-redux"; // ייבוא useDispatch
+import { useDispatch, useSelector } from "react-redux"; // ייבוא useDispatch
 import { saveUser } from "../Store/UserSlice"; // עדכן את הנתיב לפי הצורך
-
 
 const Login = () => {
     const navigate = useNavigate(); // הגדרת navigate
-    const dispatch = useDispatch(); 
+    const dispatch = useDispatch();
     const userSlice = useSelector((state) => state.user);
-
-
-    const handleRoleSelection = (selectedRole) => {
-        if (selectedRole === "Photographer") {
-            navigate("/register-photography", { state: { name, email, password } });
-        } else if (selectedRole === "Renter") {
-            navigate("/register-renter", { state: { name, email, password } });
-        } else if (selectedRole === "User") {
-            navigate("/register-user", { state: { name, email, password } });
-        }
-    };
 
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
@@ -42,25 +30,35 @@ const Login = () => {
                 },
             });
             console.log("Login successful:", response.data);
-            let myName=""
+            let myName = "";
             switch (response.data.role) {
-                case "User": myName = response.data.user.userName;
+                case "User":
+                    myName = response.data.user.userName;
                     break;
-                case "Renter": myName = response.data.user.renterName;
+                case "Renter":
+                    myName = response.data.user.renterName;
                     break;
-                case "Photography": myName = response.data.user.photographyName;
+                case "Photography":
+                    myName = response.data.user.photographyName;
                     break;
             }
-            
-            dispatch(saveUser({
-                name: myName || name, // אם יש שם מהתגובה, השתמש בו, אחרת השתמש בשם מהקלט
-                id: response.data.user._id, // הנח שיש id מהתגובה
-                role: response.data.role // הנח שיש role מהתגובה
-            }));
+
+            dispatch(
+                saveUser({
+                    name: myName || name, // אם יש שם מהתגובה, השתמש בו, אחרת השתמש בשם מהקלט
+                    id: response.data.user._id, // הנח שיש id מהתגובה
+                    role: response.data.role, // הנח שיש role מהתגובה
+                })
+            );
             alert("Login successful!");
+            const token = response.data.token; // קבלת הטוקן מהתגובה
+            localStorage.setItem('token', token);
+            // ניתוב לקומפוננטת RenterHome במקרה של הצלחה
+            if (response.data.role === "Renter") {
+                navigate("/renterhome");
+            }
 
             setShowRoleSelection(false); // הסתרת כפתורי התפקיד במקרה של הצלחה
-
         } catch (error) {
             if (error.response && (error.response.status === 400 || error.response.status === 404)) {
                 console.error("Error during login:", error.response.data);
@@ -72,7 +70,7 @@ const Login = () => {
             }
         }
     };
- 
+
     return (
         <div>
             <h1>Login</h1>

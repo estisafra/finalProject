@@ -1,19 +1,30 @@
 import { Routes, Route } from "react-router-dom";
-import Login from "./Components/Login";
-import RegisterPhotography from "./Components/RegisterPhotography";
-import RegisterRenter from "./Components/RegisterRenter";
-import RegisterUser from "./Components/RegisterUser";
-import RenterAccessories from "./Components/RenterAccessories";
+import { lazy, Suspense } from "react";
+
+// טעינה דינמית של הקומפוננטות
+const Home = lazy(() => import("./Components/Home"));
+const Login = lazy(() => import("./Components/Login"));
+const RegisterPhotography = lazy(() => import("./Components/RegisterPhotography"));
+const RegisterRenter = lazy(() => import("./Components/RegisterRenter"));
+const RegisterUser = lazy(() => import("./Components/RegisterUser"));
+const RenterHome = lazy(() => import("./Components/RenterHome"));
+const RenterAccessories = lazy(() => import("./Components/RenterAccessories"));
+const RenterRents = lazy(() => import("./Components/RenterRents"));
 
 function App() {
   return (
-    <Routes>
-      <Route path="/" element={<Login />} />
-      <Route path="/register-photography" element={<RegisterPhotography />} />
-      <Route path="/register-renter" element={<RegisterRenter />} />
-      <Route path="/register-user" element={<RegisterUser />} />
-    </Routes>
-    // <RenterAccessories/>
+    <Suspense fallback={<div>Loading...</div>}>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register-photography" element={<RegisterPhotography />} />
+        <Route path="/register-renter" element={<RegisterRenter />} />
+        <Route path="/register-user" element={<RegisterUser />} />
+        <Route path="/renterhome" element={<RenterHome />} />
+        <Route path="/renteraccessories" element={<RenterAccessories />} />
+        <Route path="/renterrents" element={<RenterRents />} />
+      </Routes>
+    </Suspense>
   );
 }
 

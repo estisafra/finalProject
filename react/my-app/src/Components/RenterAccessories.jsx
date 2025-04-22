@@ -6,8 +6,8 @@ import AddAccessory from "./AddAccessory";
 const  RenterAccessories = () => {
     const[accessories, setAccessories] = useState([])
     const [showAddAccessory, setShowAddAccessory] = useState(false);
-    //  const id = useSelector((state) => state.user.id); 
-     const id="67ea7200d3d21caf4dd0f6a2"
+      const id = useSelector((state) => state.user.id); 
+    //  const id="67ea7200d3d21caf4dd0f6a2"
         useEffect(() => {
             if (id) {
                 axios.get(`http://localhost:8080/Accessory/getAccessoryByRenter/${id}`)
@@ -19,7 +19,7 @@ const  RenterAccessories = () => {
                         console.error("Error fetching rents:", error);
                     });
             }
-        }, []);
+        }, [id]);
         if (showAddAccessory) {
           
            return <AddAccessory/>

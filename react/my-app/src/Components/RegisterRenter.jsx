@@ -1,18 +1,19 @@
 import { useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom"; // ייבוא useNavigate
 import axios from "axios";
-import { useDispatch,useSelector } from "react-redux"; // ייבוא useDispatch
+import { useDispatch, useSelector } from "react-redux"; // ייבוא useDispatch
 import { saveUser } from "../Store/UserSlice"; // עדכן את הנתיב לפי הצורך
-
 
 const RegisterRenter = () => {
     const location = useLocation();
+    const navigate = useNavigate(); // הגדרת navigate
     const dispatch = useDispatch(); 
     const userSlice = useSelector((state) => state.user);
     const { name, email, password } = location.state || {}; // קבלת הפרטים מה-props
 
     const [address, setAddress] = useState("");
     const [phone, setPhone] = useState("");
+
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -33,13 +34,16 @@ const RegisterRenter = () => {
             });
             console.log("Registration successful:", response.data);
             alert("Registration successful!");
-
+            const token = response.data.token; // קבלת הטוקן מהתגובה
+            localStorage.setItem('token', token);
             dispatch(saveUser({
-                name: name , // אם יש שם מהתגובה, השתמש בו, אחרת השתמש בשם מהקלט
+                name: name, // אם יש שם מהתגובה, השתמש בו, אחרת השתמש בשם מהקלט
                 id: response.data.user._id, // הנח שיש id מהתגובה
-                role:registerData.userType // הנח שיש role מהתגובה
+                role: registerData.userType // הנח שיש role מהתגובה
             }));
 
+            // ניתוב לקומפוננטת RenterHome
+            navigate("/renterhome");
         } catch (error) {
             console.error("Error during registration:", error);
             alert("Registration failed. Please try again.");
