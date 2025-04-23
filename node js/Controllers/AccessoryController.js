@@ -138,7 +138,7 @@ async function deleteAccessoryFromRenter(req, res) {
     
     try {
         const renter = await Renters.findOne({ _id: new mongoose.Types.ObjectId(renterid), 'renterAccessory.accessory': new mongoose.Types.ObjectId(accessoryid) });
-console.log("Renter found:", renter);
+        console.log("Renter found:", renter);
         console.log("Checking for active rentals...");
         const activeRentals = await Rent.findOne({
             rentUser: renterid,
