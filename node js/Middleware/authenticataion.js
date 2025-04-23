@@ -10,25 +10,42 @@ async function login(req, res) {
     try {
         const { email, password} = req.body;
          userType=""
-         let user = await User.findOne({ userMail: email });
-         if (user && await bcrypt.compare(password, user.userPassword)) {
-             userType = "User";
+         user = await User.findOne({ userMail: email });
+         if (user) {
+             const match = await bcrypt.compare(password, user.userPassword);
+             if (match) {
+                 userType = "User";
+             } else {
+                 return res.status(300).json({ status: 'error', message:"סיסמה שגויה"  });
+             }
          }
+         
+         // חיפוש משתמש מסוג Renter אם לא נמצא
          if (!userType) {
-            user = await Renter.findOne({ renterMail: email });
-            if (user && await bcrypt.compare(password, user.renterPassword)) {
-                userType = "Renter";
-            }
-        }
-    
-        // חיפוש משתמש מסוג Photography
-        if (!userType) {
-            user = await Photography.findOne({ PhotographyMail: email });
-            if (user && await bcrypt.compare(password, user.photographyPassword)) {
-                userType = "Photography";
-            }
-        }
-    
+             user = await Renter.findOne({ renterMail: email });
+             if (user) {
+                 const match = await bcrypt.compare(password, user.renterPassword);
+                 if (match) {
+                     userType = "Renter";
+                 } else {
+                     return res.status(300).json({ status: 'error', message: "סיסמה שגויה" });
+                 }
+             }
+         }
+         
+         // חיפוש משתמש מסוג Photography אם לא נמצא
+         if (!userType) {
+             user = await Photography.findOne({ PhotographyMail: email });
+             if (user) {
+                 const match = await bcrypt.compare(password, user.photographyPassword);
+                 if (match) {
+                     userType = "Photography";
+                 } else {
+                     return res.status(300).json({ status: 'error', message: "סיסמה שגויה"  });
+                 }
+             }
+         }
+         
         // בדוק אם סוג המשתמש סופק
         if (!userType || !["User", "Renter", "Photography"].includes(userType)) {
             return res.status(400).send("המשתמש לא קיים");

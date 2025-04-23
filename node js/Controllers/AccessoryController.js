@@ -83,6 +83,7 @@ async function getAccessoryByRenter(req, res) {
 
             return {
                 accessoryName: accessory.accessoryName,
+                accessoryId: accessory._id,
                 price: renterInfo?.price || null,
                 image: renterInfo?.image ? `/uploads/${renterInfo.image.replace(/^uploads[\\/]/, '')}` : null
             };
@@ -132,41 +133,54 @@ async function updateAccessory(req, res) {
 async function deleteAccessoryFromRenter(req, res) {
     let { renterid } = req.params;
     let accessoryid = req.body.accessoryid;
-
+    console.log("Renter ID:", renterid);
+    console.log("Accessory ID:", accessoryid);
+    
     try {
+        const renter = await Renters.findOne({ _id: new mongoose.Types.ObjectId(renterid), 'renterAccessory.accessory': new mongoose.Types.ObjectId(accessoryid) });
+console.log("Renter found:", renter);
+        console.log("Checking for active rentals...");
         const activeRentals = await Rent.findOne({
             rentUser: renterid,
             rentAccessories: accessoryid,
             rentReturnDate: { $exists: false } 
         });
 
+        console.log("Active Rentals Found:", activeRentals);
+
         if (activeRentals) {
             return res.status(400).send("Cannot delete the accessory while it is still rented.");
         }
 
-        await Renters.updateOne(
-            { _id: renterid },
-            { $pull: { renterAccessory: { accessory: accessoryid } } }
+        console.log("Updating Renters...");
+        const updateResult = await Renters.updateOne(
+            { _id: renterid, 'renterAccessory.accessory': new mongoose.Types.ObjectId(accessoryid) },
+            { $pull: { renterAccessory: { accessory: new mongoose.Types.ObjectId(accessoryid) } } }
         );
+        console.log("Renters Update Result:", updateResult);
+
+        console.log("Updating Accessory...");
         await Accessory.updateOne(
-            { _id: accessoryid },
+            { _id: new mongoose.Types.ObjectId(accessoryid) },
             { $pull: { renters: renterid } } 
         );
 
-        const renterCount = await Renters.countDocuments({ 'renterAccessory.accessory': accessoryid });
+        console.log("Counting renters for accessory...");
+        const renterCount = await Renters.countDocuments({ 'renterAccessory.accessory': new mongoose.Types.ObjectId(accessoryid) });
+        console.log("Renter Count:", renterCount);
 
         if (renterCount === 0) {
-           
-            await Accessory.findByIdAndDelete(accessoryid);
+            console.log("No more renters for accessory, deleting...");
+            await Accessory.findByIdAndDelete(new mongoose.Types.ObjectId(accessoryid));
         }
 
+        console.log("Sending response with status 204");
         res.status(204).send();
     } catch (error) {
+        console.error("Error occurred:", error);
         res.status(500).send(error.message);
     }
 }
-
-
 
 
 module.exports={createAccessory,getAccessoryByRenter,deleteAccessory,getAccessoryByGallery,updateAccessory,deleteAccessoryFromRenter,getAccessoryRentersDetails,getAllAccessory}

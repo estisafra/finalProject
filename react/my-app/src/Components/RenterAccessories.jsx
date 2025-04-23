@@ -1,48 +1,64 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { useSelector } from 'react-redux';
-import { Link } from "react-router-dom";
 import AddAccessory from "./AddAccessory";
-const  RenterAccessories = () => {
-    const[accessories, setAccessories] = useState([])
+import DeleteAccessory from "./DeleteAccessory"; // Import DeleteAccessory component
+
+const RenterAccessories = () => {
+    const [accessories, setAccessories] = useState([]);
     const [showAddAccessory, setShowAddAccessory] = useState(false);
-      const id = useSelector((state) => state.user.id); 
-    //  const id="67ea7200d3d21caf4dd0f6a2"
-        useEffect(() => {
-            if (id) {
-                axios.get(`http://localhost:8080/Accessory/getAccessoryByRenter/${id}`)
-                    .then(response => {
-                        console.log("Response data:", response.data);
-                        setAccessories(response.data); 
-                    })
-                    .catch(error => {
-                        console.error("Error fetching rents:", error);
-                    });
-            }
-        }, [id]);
-        if (showAddAccessory) {
-          
-           return <AddAccessory/>
+    const [showDeleteAccessory, setShowDeleteAccessory] = useState(false);
+    const [deletingAccessoryId, setDeletingAccessoryId] = useState(null);
+    const id = useSelector((state) => state.user.id); 
+     
+    useEffect(() => {
+        if (id) {
+            axios.get(`http://localhost:8080/Accessory/getAccessoryByRenter/${id}`)
+                .then(response => {
+                    console.log("Response data:", response.data);
+                    setAccessories(response.data); 
+                })
+                .catch(error => {
+                    console.error("Error fetching rents:", error);
+                });
         }
-    
-    return(
-        
+    }, [id]);
+
+    if (showAddAccessory) {
+        return <AddAccessory />;
+    }
+
+    if (showDeleteAccessory && deletingAccessoryId) {
+        return <DeleteAccessory accessoryid={deletingAccessoryId} onClose={() => setShowDeleteAccessory(false)} />;
+    }
+
+    const handleDelete = (accessoryid) => {
+        console.log("Deleting accessory with ID:", accessoryid); // הוסף שורה זו כדי לבדוק
+        setDeletingAccessoryId(accessoryid);
+        setShowDeleteAccessory(true);
+    };
+
+    return (
         <div>
-           <button onClick={() => setShowAddAccessory(true)}>to add accessory</button>
-        
-            <h1>Rener Accessories</h1>
+            <button onClick={() => setShowAddAccessory(true)}>To add accessory</button>
+            <h1>Renter Accessories</h1>
             <ul>
-            <ul>
-           {accessories.map((accessory, index) => (
-           <li key={index}>
-             accessory Name: {accessory.accessoryName}  <br />
-             accessory Price: {accessory. price} <br />
-             <img src={`http://localhost:8080${accessory.image}`} alt="accessory" style={{ width: "100px", height: "auto" }}/>
-           </li>
-    ))}
-</ul>
+                {accessories.map((accessory) => (
+                    <li key={accessory.accessoryId|| accessory.accessoryName}>
+                        <div>
+                            Accessory Name: {accessory.accessoryName} <br />
+                            Accessory Price: {accessory.price} <br />
+                            <img src={`http://localhost:8080${accessory.image}`} alt="accessory" style={{ width: "100px", height: "auto" }} />
+                        </div>
+                        <button onClick={() => {
+                            console.log("Button clicked for accessory ID:", accessory.accessoryId); // הוסף שורה זו כדי לבדוק
+                            handleDelete( accessory.accessoryId);
+                        }}>Delete</button>
+                    </li>
+                ))}
             </ul>
         </div>
-    )
+    );
 }
-export default RenterAccessories
+
+export default RenterAccessories;

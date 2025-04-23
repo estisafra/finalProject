@@ -1,6 +1,8 @@
 import { Routes, Route } from "react-router-dom";
 import { lazy, Suspense } from "react";
-
+import 'primereact/resources/themes/saga-blue/theme.css';  // תוכל לבחור את הנושא שאתה אוהב
+import 'primereact/resources/primereact.min.css';
+import 'primeicons/primeicons.css';
 // טעינה דינמית של הקומפוננטות
 const Home = lazy(() => import("./Components/Home"));
 const Login = lazy(() => import("./Components/Login"));
@@ -14,6 +16,7 @@ const RenterAccessories = lazy(() => import("./Components/RenterAccessories"));
 const RenterRents = lazy(() => import("./Components/RenterRents"));
 
 function App() {
+  
   return (
     <Suspense fallback={<div>Loading...</div>}>
       <Routes>
