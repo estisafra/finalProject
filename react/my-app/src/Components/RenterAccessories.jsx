@@ -47,31 +47,19 @@ const RenterAccessories = () => {
     const handleDeleteSuccess = async () => {
         setDeletingAccessoryId(null); // איפוס ה-ID של האביזר שנמחק
     
-        // קריאה לשרת כדי לשלוף את הרשימה המעודכנת
-        const token = localStorage.getItem("token");
-        if (id) {
-            try {
-                const response = await axios.get(`http://localhost:8080/Accessory/getAccessoryByRenter/${id}`, {
-                    headers: {
-                        "Authorization": `Bearer ${token}`,
-                    },
-                });
-                console.log("Updated accessories list:", response.data);
-                setAccessories(response.data); // עדכון הרשימה עם הנתונים מהשרת
+        // עדכון הרשימה על ידי סינון האביזר שנמחק
+        setAccessories(prevAccessories => 
+            prevAccessories.filter(accessory => accessory.accessoryId !== deletingAccessoryId)
+        );
     
-                // הצגת הודעת הצלחה
-                toast.current.show({
-                    severity: 'success',
-                    summary: 'Success',
-                    detail: 'Accessory deleted successfully',
-                    life: 3000, // משך הזמן שבו ההודעה תוצג (במילישניות)
-                });
-            } catch (error) {
-                console.error("Error fetching updated accessories:", error);
-            }
-        }
+        // הצגת הודעת הצלחה
+        toast.current.show({
+            severity: 'success',
+            summary: 'Success',
+            detail: 'Accessory deleted successfully',
+            life: 3000,
+        });
     };
-
     return (
         <div>
             <Toast ref={toast} /> {/* רכיב Toast להצגת הודעות */}
