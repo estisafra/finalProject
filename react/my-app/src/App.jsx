@@ -14,6 +14,7 @@ const UserHome = lazy(() => import("./Components/UserHome"));
 const PhotographyHome = lazy(() => import("./Components/PhotographyHome"));
 const RenterAccessories = lazy(() => import("./Components/RenterAccessories"));
 const RenterRents = lazy(() => import("./Components/RenterRents"));
+const AddAccessory = lazy(() => import("./Components/AddAccessory"));
 
 function App() {
   
@@ -30,6 +31,8 @@ function App() {
         <Route path="/photographyHome" element={<PhotographyHome />} />
         <Route path="/renterAccessories" element={<RenterAccessories />} />
         <Route path="/renterRents" element={<RenterRents />} />
+        <Route path="/addAccessory" element={<AddAccessory />} />
+
       </Routes>
     </Suspense>
   );
