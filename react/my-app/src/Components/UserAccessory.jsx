@@ -159,6 +159,7 @@ const UserAccessory = () => {
                                     boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
                                     backgroundColor: "white", // רקע לבן עבור כל משכיר
                                     color: "black", // צבע טקסט שחור עבור כל משכיר
+                                    position: "relative", // מאפשר מיקום יחסי לאייקון
                                 }}
                             >
                                 <h3>{accessory.accessoryName}</h3>
@@ -168,6 +169,22 @@ const UserAccessory = () => {
                                     alt={`${accessory.accessoryName} - Renter ${index + 1}`}
                                     style={{ width: "100%", height: "150px", objectFit: "cover", borderRadius: "8px" }}
                                 />
+                          <Button
+    icon="pi pi-shopping-cart"
+    className="p-button-rounded p-button-success"
+    style={{
+        position: "absolute",
+        bottom: "10px",
+        right: "10px",
+        backgroundColor: "#008080", // צבע רקע תואם לסרגל
+        color: "white", // צבע טקסט לבן
+    }}
+    onClick={() =>
+        navigate("/AccessoryDetails", {
+            state: { accessory, renter, renterId: renter.renter }, // הוספת ה-renterId ל-state
+        })
+    }
+/>
                             </div>
                         ))
                     )}

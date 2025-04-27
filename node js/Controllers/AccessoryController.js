@@ -182,5 +182,39 @@ console.log("Renter found:", renter);
     }
 }
 
+const getOccupiedDates = async (req, res) => {
+    try {
+        const { renterId, accessoryId, year, month } = req.body;
 
-module.exports={createAccessory,getAccessoryByRenter,deleteAccessory,getAccessoryByGallery,updateAccessory,deleteAccessoryFromRenter,getAccessoryRentersDetails,getAllAccessory}
+        // חישוב טווח התאריכים של החודש המבוקש
+        const startOfMonth = new Date(year, month, 1); // תחילת החודש
+        const endOfMonth = new Date(year, month + 1, 0); // סוף החודש
+
+        // שליפת השכרות עבור המשכיר והאביזר בטווח התאריכים
+        const rents = await Rents.find({
+            rentRenter: renterId,
+            rentAccessories: accessoryId,
+            rentDate: { $gte: startOfMonth, $lte: endOfMonth },
+        });
+
+        // יצירת מערך של כל התאריכים התפוסים
+        const occupiedDates = [];
+        rents.forEach((rent) => {
+            const startDate = new Date(rent.rentDate);
+            const endDate = rent.rentReturnDate ? new Date(rent.rentReturnDate) : startDate;
+
+            // הוספת כל התאריכים בטווח למערך
+            for (let date = startDate; date <= endDate; date.setDate(date.getDate() + 1)) {
+                occupiedDates.push(new Date(date)); // הוספת עותק של התאריך
+            }
+        });
+
+        res.status(200).json(occupiedDates); // החזרת התאריכים התפוסים
+    } catch (error) {
+        console.error("Error fetching occupied dates:", error);
+        res.status(500).send(error.message);
+    }
+};
+
+
+module.exports={createAccessory,getAccessoryByRenter,deleteAccessory,getAccessoryByGallery,updateAccessory,deleteAccessoryFromRenter,getAccessoryRentersDetails,getAllAccessory,getOccupiedDates }

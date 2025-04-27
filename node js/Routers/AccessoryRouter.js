@@ -1,6 +1,6 @@
 const express = require("express")
 const router = express.Router()
-const { createAccessory,deleteAccessory,getAccessoryByGallery,getAccessoryByRenter,updateAccessory,deleteAccessoryFromRenter,getAccessoryRentersDetails,getAllAccessory} = require("../Controllers/AccessoryController")
+const { createAccessory,deleteAccessory,getAccessoryByGallery,getAccessoryByRenter,updateAccessory,deleteAccessoryFromRenter,getAccessoryRentersDetails,getAllAccessory,getOccupiedDates } = require("../Controllers/AccessoryController")
 const { verifyToken } = require("../Middleware/authenticataion");
 
 router.post("/createAccessory",createAccessory)
@@ -11,5 +11,5 @@ router.get("/getAccessoryRentersDetails/:accessoryId",verifyToken,getAccessoryRe
 router.get("/getAccessoryByRenter/:renterId",verifyToken,getAccessoryByRenter)
 router.put("/updateAccessory/:id",verifyToken,updateAccessory)
 router.put("/deleteAccessoryFromRenter/:renterid",verifyToken,deleteAccessoryFromRenter)
-
+router.get("/getOccupiedDates",verifyToken,getOccupiedDates)
 module.exports=router
