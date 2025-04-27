@@ -153,6 +153,7 @@ const RenterAccessories = () => {
                 }}
             />
             <div style={{ padding: "1rem" }}>
+            <button onClick={() => setShowAddAccessory(true)}>To add accessory</button>
                 <h1>Renter Accessories</h1>
                 <ul>
                     {accessories.map((accessory) => (
