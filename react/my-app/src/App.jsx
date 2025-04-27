@@ -3,6 +3,7 @@ import { lazy, Suspense } from "react";
 import 'primereact/resources/themes/saga-blue/theme.css';  // תוכל לבחור את הנושא שאתה אוהב
 import 'primereact/resources/primereact.min.css';
 import 'primeicons/primeicons.css';
+import SendEmails from "./Components/SendEmails";
 // טעינה דינמית של הקומפוננטות
 const Home = lazy(() => import("./Components/Home"));
 const Login = lazy(() => import("./Components/Login"));
@@ -35,6 +36,7 @@ function App() {
 
       </Routes>
     </Suspense>
+   
   );
 }
 
