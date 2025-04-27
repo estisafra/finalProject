@@ -5,12 +5,11 @@ import { useNavigate } from "react-router-dom";
 import { Menubar } from "primereact/menubar";
 import { Toast } from "primereact/toast"; // ייבוא Toast מ-PrimeReact
 import { Button } from "primereact/button"; // ייבוא Button מ-PrimeReact
-import AddAccessory from "./AddAccessory";
 import DeleteAccessory from "./DeleteAccessory";
 
 const RenterAccessories = () => {
     const [accessories, setAccessories] = useState([]); // רשימת האביזרים
-    const [showAddAccessory, setShowAddAccessory] = useState(false); // שליטה על הצגת קומפוננטת הוספה
+    const [showAddAccessory, setShowAddAccessory] = useState(false); // שליטה על תצוגת הוספת אביזר
     const [deletingAccessoryId, setDeletingAccessoryId] = useState(null); // ID של האביזר למחיקה
     const [showProfileMenu, setShowProfileMenu] = useState(false); // שליטה על תפריט הפרופיל
     const id = useSelector((state) => state.user.id); // ID של המשתמש המחובר
@@ -29,7 +28,6 @@ const RenterAccessories = () => {
                             "Authorization": `Bearer ${token}`,
                         },
                     });
-                    console.log("Response data:", response.data);
                     setAccessories(response.data);
                 } catch (error) {
                     console.error("Error fetching accessories:", error);
@@ -41,7 +39,7 @@ const RenterAccessories = () => {
     }, [id]);
 
     if (showAddAccessory) {
-       navigate("/addAccessory"); // ניווט לדף הוספת אביזר
+        navigate("/addAccessory"); // ניווט לדף הוספת אביזר
     }
 
     // טיפול במחיקת אביזר
@@ -50,32 +48,21 @@ const RenterAccessories = () => {
     };
 
     // עדכון הרשימה לאחר מחיקה
-    const handleDeleteSuccess = async () => {
+    const handleDeleteSuccess = () => {
+        // עדכון הרשימה על ידי סינון האביזר שנמחק
+        setAccessories(prevAccessories => 
+            prevAccessories.filter(accessory => accessory.accessoryId !== deletingAccessoryId)
+        );
+
+        // הצגת הודעת הצלחה
+        toast.current.show({
+            severity: 'success',
+            summary: 'Success',
+            detail: 'Accessory deleted successfully',
+            life: 3000,
+        });
+
         setDeletingAccessoryId(null); // איפוס ה-ID של האביזר שנמחק
-
-        // קריאה לשרת כדי לשלוף את הרשימה המעודכנת
-        const token = localStorage.getItem("token");
-        if (id) {
-            try {
-                const response = await axios.get(`http://localhost:8080/Accessory/getAccessoryByRenter/${id}`, {
-                    headers: {
-                        "Authorization": `Bearer ${token}`,
-                    },
-                });
-                console.log("Updated accessories list:", response.data);
-                setAccessories(response.data); // עדכון הרשימה עם הנתונים מהשרת
-
-                // הצגת הודעת הצלחה
-                toast.current.show({
-                    severity: "success",
-                    summary: "Success",
-                    detail: "Accessory deleted successfully",
-                    life: 3000, // משך הזמן שבו ההודעה תוצג (במילישניות)
-                });
-            } catch (error) {
-                console.error("Error fetching updated accessories:", error);
-            }
-        }
     };
 
     // פריטי ה-Menubar
@@ -166,7 +153,6 @@ const RenterAccessories = () => {
                 }}
             />
             <div style={{ padding: "1rem" }}>
-                <button onClick={() => setShowAddAccessory(true)}>To add accessory</button>
                 <h1>Renter Accessories</h1>
                 <ul>
                     {accessories.map((accessory) => (
