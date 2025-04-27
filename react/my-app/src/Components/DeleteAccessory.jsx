@@ -43,7 +43,7 @@ const DeleteAccessory = ({ accessoryid, onSuccess, onClose }) => {
         };
 
         deleteAccessory();
-    }, [accessoryid, renterId, onSuccess, onClose]); // תלות בפרמטרים
+    }, [accessoryid, renterId, onSuccess, onClose]); 
 
     return null; // הקומפוננטה לא מציגה שום דבר
 };
