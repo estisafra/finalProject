@@ -180,7 +180,7 @@ const Login = () => {
                     backgroundColor: "#008080",
                     color: "white",
                     borderBottom: "2px solid #005757",
-                    height: "70px",
+                    height: "100px",
                 }}
             />
             <div

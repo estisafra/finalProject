@@ -66,51 +66,50 @@ const RegisterPhotography = () => {
         );
     };
 
-    // שליחת הנתונים לשרת
     const handleSubmit = async (e) => {
         e.preventDefault();
-
+    
         const formData = new FormData();
-        formData.append("password", password);
-        formData.append("name", name);
-        formData.append("email", email);
-        formData.append("address", address);
-        formData.append("phone", phone);
-        formData.append("link", photographyLink);
-        formData.append("userType", "Photography");
-
+        formData.append("photographyPassword", password);
+        formData.append("photographyName", name);
+        formData.append("photographyMail", email);
+        formData.append("photographyAddress", address);
+        formData.append("photographyPhone", phone);
+        formData.append("photographyLink", photographyLink);
+    
         // הוספת כל הגלריות ל-FormData
         photographyGaleries.forEach((gallery, index) => {
             formData.append(`galeries[${index}][name]`, gallery.name);
             formData.append(`galeries[${index}][minPrice]`, gallery.minPrice);
             formData.append(`galeries[${index}][maxPrice]`, gallery.maxPrice);
         });
-
-        // הוספת כל התמונות ל-FormData
+    
+        // הוספת מערך photographyImages ל-FormData
         Images.forEach((image, index) => {
-            formData.append(`images[${index}][url]`, image.url);
-            formData.append(`images[${index}][gallery]`, image.gallery);
+            formData.append(`images[${index}][url]`, image.url); // הקובץ עצמו
+            formData.append(`images[${index}][galery]`, image.gallery); // שם הגלריה
         });
-
+    
         // הוספת כל הקבצים עצמם ממערך allImages ל-FormData
-        allImages.forEach((file, index) => {
-            formData.append(`allImages[${index}]`, file);
+        allImages.forEach((file) => {
+            formData.append("allImages", file); // הקבצים עצמם להעלאה
         });
-
-        formData.forEach((value, key) => {
-            console.log(key, value);
-        });
-
+    
+        console.log("FormData content:");
+        for (let [key, value] of formData.entries()) {
+            console.log(`${key}:`, value);
+        }
+    
         try {
             const response = await axios.post("http://localhost:8080/System/register", formData, {
                 headers: {
                     "Content-Type": "multipart/form-data",
                 },
             });
-
+    
             console.log("Registration successful:", response.data);
             alert("Registration successful!");
-
+    
             dispatch(
                 saveUser({
                     name: name,
@@ -118,11 +117,16 @@ const RegisterPhotography = () => {
                     role: "User",
                 })
             );
-
+    
             navigate("/photographyHome");
         } catch (error) {
             console.error("Error during registration:", error);
-            alert("Registration failed. Please try again.");
+            if (error.response) {
+                console.error("Server response:", error.response.data);
+                alert(`Registration failed: ${error.response.data.message || "Unknown error"}`);
+            } else {
+                alert("Registration failed. Please try again.");
+            }
         }
     };
 

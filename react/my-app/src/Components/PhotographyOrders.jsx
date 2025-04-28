@@ -3,7 +3,7 @@ import axios from "axios";
 import { useSelector } from 'react-redux';
 const  PhotographyOrders = () => {
     const[orders, setOrders] = useState([])
-      const id = useSelector((state) => state.user.id); 
+    const id = useSelector((state) => state.user.id); 
    
     useEffect(() => {
        

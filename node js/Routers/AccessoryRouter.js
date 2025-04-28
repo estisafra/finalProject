@@ -12,4 +12,5 @@ router.get("/getAccessoryByRenter/:renterId",verifyToken,getAccessoryByRenter)
 router.put("/updateAccessory/:id",verifyToken,updateAccessory)
 router.put("/deleteAccessoryFromRenter/:renterid",verifyToken,deleteAccessoryFromRenter)
 router.get("/getOccupiedDates",verifyToken,getOccupiedDates)
+
 module.exports=router

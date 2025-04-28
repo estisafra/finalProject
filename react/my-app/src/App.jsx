@@ -17,6 +17,7 @@ const RenterRents = lazy(() => import("./Components/RenterRents"));
 const AddAccessory = lazy(() => import("./Components/AddAccessory"));
 const UserAccessory = lazy(() => import("./Components/UserAccessory"));
 const AccessoryDetails = lazy(() => import("./Components/AccessoryDetails"));
+
 function App() {
   
   return (
@@ -35,7 +36,6 @@ function App() {
         <Route path="/addAccessory" element={<AddAccessory />} />
         <Route path="/userAccessory" element={<UserAccessory />} />
         <Route path="/accessoryDetails" element={<AccessoryDetails />} />
-
       </Routes>
     </Suspense>
   );
