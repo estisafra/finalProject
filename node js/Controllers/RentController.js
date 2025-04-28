@@ -205,4 +205,40 @@ async function removeAccessory(req, res) {
     }
 }
 
-module.exports={ deleteRent,createRent,addAccessory,getAllRents,updateRent,removeAccessory,getRentsByRenter}
+async function checkOrCreateRent(req, res) {
+    try {
+        const { rentDate, renterId, accessoryId } = req.body;
+
+        // בדוק אם יש השכרה קיימת בתאריך זה
+        const existingRent = await Rent.findOne({
+            rentDate: new Date(rentDate),
+            rentAccessories: accessoryId,
+        });
+
+        if (!existingRent) {
+            // אם אין השכרה, צור השכרה חדשה
+            const newRent = new Rent({
+                rentDate: new Date(rentDate),
+                rentRenter: renterId,
+                rentAccessories: [accessoryId],
+            });
+            await newRent.save();
+            return res.status(201).send({ message: "New rent created" });
+        }
+
+        // אם יש השכרה קיימת, בדוק אם היא שייכת לאותו משכיר
+        if (existingRent.rentRenter.toString() !== renterId) {
+            return res
+                .status(200)
+                .send({ message: "Existing rent found for another renter" });
+        }
+
+        // אם ההשכרה שייכת לאותו משכיר, החזר הודעה מתאימה
+        return res.status(200).send({ message: "Rent already exists for this renter" });
+    } catch (error) {
+        console.error("Error checking or creating rent:", error);
+        res.status(500).send(error.message);
+    }
+}
+
+module.exports={ deleteRent,createRent,addAccessory,getAllRents,updateRent,removeAccessory,getRentsByRenter,checkOrCreateRent}

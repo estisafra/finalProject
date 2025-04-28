@@ -127,10 +127,10 @@ const UserAccessory = () => {
                 backgroundPosition: "center",
                 display: "flex",
                 flexDirection: "column",
-                color: "white", // צבע טקסט לבן כדי להתאים לרקע
+                color: "black", // צבע טקסט לבן כדי להתאים לרקע
             }}
         >
-            <Menubar
+           <Menubar
                 model={items}
                 start={start}
                 end={end}

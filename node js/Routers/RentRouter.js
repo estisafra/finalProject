@@ -1,6 +1,6 @@
 const express = require("express")
 const router = express.Router()
-const { deleteRent,createRent,addAccessory,getAllRents,updateRent,removeAccessory,getRentsByRenter} = require("../Controllers/RentController")
+const { deleteRent,createRent,addAccessory,getAllRents,updateRent,removeAccessory,getRentsByRenter,checkOrCreateRent} = require("../Controllers/RentController")
 const {  verifyToken } = require("../Middleware/authenticataion");
 
 router.post("/createRent/userId",createRent)
@@ -12,4 +12,6 @@ router.put("/removeAccessory/:userId/:renterId",verifyToken,removeAccessory)
 //body- date
 router.put("/updateRent/:id",verifyToken,updateRent)
 router.get("/getRentsByRenter/:renterId",verifyToken,getRentsByRenter)
+router.post("/checkOrCreateRent",verifyToken,checkOrCreateRent)
+
 module.exports = router
