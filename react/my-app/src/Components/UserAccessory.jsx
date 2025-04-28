@@ -14,7 +14,9 @@ const UserAccessory = () => {
     // קריאת fetch לנתיב /Accessory/getAllAccessory עם token
     useEffect(() => {
         const fetchAccessories = async () => {
-            const token = localStorage.getItem("token"); // קבלת ה-token מ-localStorage
+            const token = localStorage.getItem("token"); 
+            console.log("Token:", token); // הדפסת ה-token לקונסול
+            if (!token) {console.log("No token found"); return;} // אם אין token, לא נבצע קריאה לשרת
             try {
                 const response = await axios.get("http://localhost:8080/Accessory/getAllAccessory", {
                     headers: {

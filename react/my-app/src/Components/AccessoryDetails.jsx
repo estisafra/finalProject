@@ -50,6 +50,9 @@ const AccessoryDetails = () => {
     };
 
     // פונקציה לטיפול בבחירת תאריך
+    const userId = useSelector((state) => state.user.id); // העבר את השורה הזאת לכאן
+
+    // פונקציה לטיפול בבחירת תאריך
     const handleDateSelection = async (date) => {
         try {
             const token = localStorage.getItem("token");
@@ -58,16 +61,14 @@ const AccessoryDetails = () => {
                 navigate("/login");
                 return;
             }
-    
-            const userId = useSelector((state) => state.user.id); // קבלת userId מה-Redux
-    
+
             const response = await axios.post(
                 "http://localhost:8080/Rent/checkOrCreateRent",
                 {
                     rentDate: date,
                     renterId,
                     accessoryId: accessory._id,
-                    userId, // הוסף את userId לבקשה
+                    userId, // השתמש ב-userId שנשמר במצב
                 },
                 {
                     headers: {
@@ -75,7 +76,7 @@ const AccessoryDetails = () => {
                     },
                 }
             );
-    
+
             console.log("Rent check/create response:", response.data);
             if (response.data.message === "New rent created") {
                 alert("השכרה חדשה נפתחה בהצלחה!");
