@@ -58,13 +58,16 @@ const AccessoryDetails = () => {
                 navigate("/login");
                 return;
             }
-
+    
+            const userId = useSelector((state) => state.user.id); // קבלת userId מה-Redux
+    
             const response = await axios.post(
                 "http://localhost:8080/Rent/checkOrCreateRent",
                 {
                     rentDate: date,
                     renterId,
                     accessoryId: accessory._id,
+                    userId, // הוסף את userId לבקשה
                 },
                 {
                     headers: {
@@ -72,38 +75,20 @@ const AccessoryDetails = () => {
                     },
                 }
             );
+    
             console.log("Rent check/create response:", response.data);
             if (response.data.message === "New rent created") {
                 alert("השכרה חדשה נפתחה בהצלחה!");
-            } else if (response.data.message === "Existing rent found for another renter") {
-                const confirm = window.confirm(
-                    "יש השכרה קיימת בתאריך זה ממשכיר אחר. האם ברצונך לפתוח השכרה נוספת?"
-                );
-                if (confirm) {
-                    const createResponse = await axios.post(
-                        "http://localhost:8080/Rent/createRent",
-                        {
-                            rentDate: date,
-                            renterId,
-                            accessoryId: accessory._id,
-                        },
-                        {
-                            headers: {
-                                Authorization: `Bearer ${token}`,
-                            },
-                        }
-                    );
-                    if (createResponse.data.message === "Rent created") {
-                        alert("השכרה נוספת נפתחה בהצלחה!");
-                    }
-                }
+            } else if (response.data.message === "Accessory added to existing rent") {
+                alert("אביזר נוסף להשכרה קיימת!");
+            } else if (response.data.message === "Accessory already exists in the rent") {
+                alert("אביזר זה כבר קיים בהשכרה!");
             }
         } catch (error) {
             console.error("Error handling date selection:", error);
             alert("אירעה שגיאה בעת טיפול בבחירת התאריך.");
         }
     };
-
     // קריאה ראשונית לפונקציה בעת טעינת הקומפוננטה
     useEffect(() => {
         const currentDate = new Date();
@@ -237,21 +222,21 @@ const AccessoryDetails = () => {
                 >
                     <h3 style={{ textAlign: "center", color: "black" }}>Select a Date</h3>
                     <Calendar
-    value={selectedDate}
-    onChange={(e) => {
-        setSelectedDate(e.value);
-        handleDateSelection(e.value);
-    }}
-    inline
-    style={{ width: "100%" }}
-    disabledDates={occupiedDates} // סימון תאריכים תפוסים
-    onMonthChange={(e) => fetchOccupiedDates(e.year, e.month)} // קריאה לפונקציה בעת שינוי חודש
-/>
-{selectedDate && (
-    <p style={{ textAlign: "center", marginTop: "1rem", color: "black" }}>
-        Selected Date: {selectedDate.toLocaleDateString()}
-    </p>
-)}
+                      value={selectedDate}
+                      onChange={(e) => {
+                      setSelectedDate(e.value);
+                      handleDateSelection(e.value);
+                 }}
+                   inline
+                   style={{ width: "100%" }}
+                   disabledDates={occupiedDates} // סימון תאריכים תפוסים
+                   onMonthChange={(e) => fetchOccupiedDates(e.year, e.month)} // קריאה לפונקציה בעת שינוי חודש
+                 />
+                {selectedDate && (
+                   <p style={{ textAlign: "center", marginTop: "1rem", color: "black" }}>
+                    Selected Date: {selectedDate.toLocaleDateString()}
+                    </p>
+                )}
                 </div>
 
                 {/* כרטיס בצד הימני */}

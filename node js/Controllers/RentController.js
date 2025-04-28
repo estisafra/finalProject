@@ -207,34 +207,36 @@ async function removeAccessory(req, res) {
 
 async function checkOrCreateRent(req, res) {
     try {
-        const { rentDate, renterId, accessoryId } = req.body;
+        const { rentDate, renterId, accessoryId, userId } = req.body;
 
-        // בדוק אם יש השכרה קיימת בתאריך זה
+        // בדוק אם יש השכרה קיימת בתאריך זה עבור אותו לקוח ואותו משכיר
         const existingRent = await Rent.findOne({
             rentDate: new Date(rentDate),
-            rentAccessories: accessoryId,
+            rentRenter: renterId,
+            rentUser: userId, // הוסף את userId לבדיקה
         });
 
-        if (!existingRent) {
-            // אם אין השכרה, צור השכרה חדשה
-            const newRent = new Rent({
-                rentDate: new Date(rentDate),
-                rentRenter: renterId,
-                rentAccessories: [accessoryId],
-            });
-            await newRent.save();
-            return res.status(201).send({ message: "New rent created" });
+        if (existingRent) {
+            // בדוק אם האביזר כבר קיים בהשכרה
+            if (!existingRent.rentAccessories.includes(accessoryId)) {
+                existingRent.rentAccessories.push(accessoryId); // הוסף את האביזר להשכרה
+                await existingRent.save();
+                return res.status(200).send({ message: "Accessory added to existing rent" });
+            } else {
+                return res.status(200).send({ message: "Accessory already exists in the rent" });
+            }
         }
 
-        // אם יש השכרה קיימת, בדוק אם היא שייכת לאותו משכיר
-        if (existingRent.rentRenter.toString() !== renterId) {
-            return res
-                .status(200)
-                .send({ message: "Existing rent found for another renter" });
-        }
-
-        // אם ההשכרה שייכת לאותו משכיר, החזר הודעה מתאימה
-        return res.status(200).send({ message: "Rent already exists for this renter" });
+        // אם אין השכרה, צור השכרה חדשה
+        const newRent = new Rent({
+            rentDate: new Date(rentDate),
+            rentRenter: renterId,
+            rentUser: userId, // הוסף את userId להשכרה החדשה
+            rentAccessories: [accessoryId],
+        });
+        await newRent.save();
+        return res.status(201).send({ message: "New rent created" });
+        
     } catch (error) {
         console.error("Error checking or creating rent:", error);
         res.status(500).send(error.message);

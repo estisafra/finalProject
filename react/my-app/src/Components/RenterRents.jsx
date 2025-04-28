@@ -14,8 +14,15 @@ const RenterRents = () => {
 
     useEffect(() => {
         if (id) {
+            const token = localStorage.getItem("token"); // קבלת ה-token מה-localStorage
+            console.log("Token:", token); // הדפסת ה-token לבדיקה
+
             axios
-                .get(`http://localhost:8080/Rent/getRentsByRenter/${id}`)
+                .get(`http://localhost:8080/Rent/getRentsByRenter/${id}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`, // הוספת ה-token בכותרות
+                    },
+                })
                 .then((response) => {
                     console.log("Response data:", response.data);
                     setRents(response.data.rents); // גש למערך rents
