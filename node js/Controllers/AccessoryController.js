@@ -138,7 +138,7 @@ async function deleteAccessoryFromRenter(req, res) {
     
     try {
         const renter = await Renters.findOne({ _id: new mongoose.Types.ObjectId(renterid), 'renterAccessory.accessory': new mongoose.Types.ObjectId(accessoryid) });
-        console.log("Renter found:", renter);
+console.log("Renter found:", renter);
         console.log("Checking for active rentals...");
         const activeRentals = await Rent.findOne({
             rentUser: renterid,
@@ -162,7 +162,7 @@ async function deleteAccessoryFromRenter(req, res) {
         console.log("Updating Accessory...");
         await Accessory.updateOne(
             { _id: new mongoose.Types.ObjectId(accessoryid) },
-            { $pull: { renters: renterid } } 
+            { $pull: { accessoryRenter: { renter: renterid } } } 
         );
 
         console.log("Counting renters for accessory...");
@@ -182,5 +182,39 @@ async function deleteAccessoryFromRenter(req, res) {
     }
 }
 
+const getOccupiedDates = async (req, res) => {
+    try {
+        const { renterId, accessoryId, year, month } = req.body;
 
-module.exports={createAccessory,getAccessoryByRenter,deleteAccessory,getAccessoryByGallery,updateAccessory,deleteAccessoryFromRenter,getAccessoryRentersDetails,getAllAccessory}
+        // חישוב טווח התאריכים של החודש המבוקש
+        const startOfMonth = new Date(year, month, 1); // תחילת החודש
+        const endOfMonth = new Date(year, month + 1, 0); // סוף החודש
+
+        // שליפת השכרות עבור המשכיר והאביזר בטווח התאריכים
+        const rents = await Rents.find({
+            rentRenter: renterId,
+            rentAccessories: accessoryId,
+            rentDate: { $gte: startOfMonth, $lte: endOfMonth },
+        });
+
+        // יצירת מערך של כל התאריכים התפוסים
+        const occupiedDates = [];
+        rents.forEach((rent) => {
+            const startDate = new Date(rent.rentDate);
+            const endDate = rent.rentReturnDate ? new Date(rent.rentReturnDate) : startDate;
+
+            // הוספת כל התאריכים בטווח למערך
+            for (let date = startDate; date <= endDate; date.setDate(date.getDate() + 1)) {
+                occupiedDates.push(new Date(date)); // הוספת עותק של התאריך
+            }
+        });
+
+        res.status(200).json(occupiedDates); // החזרת התאריכים התפוסים
+    } catch (error) {
+        console.error("Error fetching occupied dates:", error);
+        res.status(500).send(error.message);
+    }
+};
+
+
+module.exports={createAccessory,getAccessoryByRenter,deleteAccessory,getAccessoryByGallery,updateAccessory,deleteAccessoryFromRenter,getAccessoryRentersDetails,getAllAccessory,getOccupiedDates }
