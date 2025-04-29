@@ -33,6 +33,10 @@ const RegisterUser = () => {
                     "Content-Type": "application/json",
                 },
             });
+            if (response.data.token) {
+                localStorage.setItem("token", response.data.token); // שמירת ה-token ב-localStorage
+                console.log("Token saved:", response.data.token);
+            }
             console.log("Registration successful:", response.data);
             alert("Registration successful!");
 

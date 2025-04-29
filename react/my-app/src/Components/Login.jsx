@@ -149,7 +149,6 @@ const Login = () => {
         } catch (error) {
             if (error.response) {
                 if (error.response.status === 400 || error.response.status === 404) {
-                    alert("Login failed. Please select your role.");
                     setShowRoleSelection(true);
                 } else if (error.response.status === 300) {
                     alert("Incorrect password. Please try again.");
