@@ -7,33 +7,56 @@ import { Button } from "primereact/button";
 
 const RenterRents = () => {
     const [rents, setRents] = useState([]);
-    const [showProfileMenu, setShowProfileMenu] = useState(false); // שליטה על תפריט הפרופיל
+    const [viewType, setViewType] = useState("current"); // current או old
+    const [showProfileMenu, setShowProfileMenu] = useState(false);
     const id = useSelector((state) => state.user.id);
-    const userName = useSelector((state) => state.user.name); // שם המשתמש
+    const userName = useSelector((state) => state.user.name);
     const navigate = useNavigate();
 
     useEffect(() => {
-        if (id) {
-            const token = localStorage.getItem("token"); // קבלת ה-token מה-localStorage
-            console.log("Token:", token); // הדפסת ה-token לבדיקה
+        if (!id) return;
 
-            axios
-                .get(`http://localhost:8080/Rent/getRentsByRenter/${id}`, {
+        const token = localStorage.getItem("token");
+        const endpoint =
+            viewType === "old"
+                ? `http://localhost:8080/Rent/getOldRentsByRenter/${id}`
+                : `http://localhost:8080/Rent/getRentsByRenter/${id}`;
+
+        axios
+            .get(endpoint, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            })
+            .then((response) => {
+                setRents(response.data.rents);
+            })
+            .catch((error) => {
+                console.error("Error fetching rents:", error);
+            });
+    }, [id, viewType]);
+
+    const handleUpdateStatus = async (rentId) => {
+        try {
+            const token = localStorage.getItem("token");
+            await axios.put(
+                `http://localhost:8080/Renter/updateRentStatusToTrue/${rentId}`,
+                {},
+                {
                     headers: {
-                        Authorization: `Bearer ${token}`, // הוספת ה-token בכותרות
+                        Authorization: `Bearer ${token}`,
                     },
-                })
-                .then((response) => {
-                    console.log("Response data:", response.data);
-                    setRents(response.data.rents); // גש למערך rents
-                })
-                .catch((error) => {
-                    console.error("Error fetching rents:", error);
-                });
+                }
+            );
+            // עדכון מצב מקומי
+            setRents((prev) =>
+                prev.map((r) => (r._id === rentId ? { ...r, status: true } : r))
+            );
+        } catch (err) {
+            console.error("Failed to update rent status", err);
         }
-    }, [id]);
+    };
 
-    // פריטי ה-Menubar
     const items = [
         {
             label: "Home",
@@ -50,7 +73,7 @@ const RenterRents = () => {
     const start = (
         <img
             alt="logo"
-            src="https://sheviphoto.co.il/wp-content/uploads/2020/12/logo.png" // לוגו מהאתר
+            src="https://sheviphoto.co.il/wp-content/uploads/2020/12/logo.png"
             style={{ height: "50px", borderRadius: "50%" }}
         />
     );
@@ -115,30 +138,62 @@ const RenterRents = () => {
                     backgroundColor: "#008080",
                     color: "white",
                     borderBottom: "2px solid #005757",
-                    height: "100px", // גובה מוגדל
+                    height: "100px",
                     width: "100%",
                 }}
             />
             <div style={{ padding: "1rem" }}>
                 <h1>Renter Rents</h1>
+
+                {/* כפתורים להחלפת תצוגה */}
+                <div style={{ marginBottom: "1rem" }}>
+                    <Button
+                        label="השכרות פעילות"
+                        onClick={() => setViewType("current")}
+                        className={`p-button-sm ${viewType === "current" ? "" : "p-button-outlined"}`}
+                        style={{ marginRight: "10px" }}
+                    />
+                    <Button
+                        label="השכרות עבר"
+                        onClick={() => setViewType("old")}
+                        className={`p-button-sm ${viewType === "old" ? "" : "p-button-outlined"}`}
+                    />
+                </div>
+
                 <ul>
-      {rents.map((rent, index) => (
-         <li key={index}>
-            Rent User: {rent.rentUser?.userName || "Unknown User"} <br />
-            Rent Date: {rent.rentDate ? new Date(rent.rentDate).toLocaleDateString() : "Unknown Date"} <br />
-            Rent Accessories:{" "}
-            {Array.isArray(rent.rentAccessories) ? (
-                rent.rentAccessories.map((accessory, index) => (
-                    <span key={index} style={{ marginLeft: "10px" }}>
-                        {accessory.accessoryName || "Unknown Accessory"}
-                    </span>
-                ))
-            ) : (
-                "No Accessories"
-            )}
-        </li>
-      ))}
-    </ul>
+                    {rents.map((rent, index) => (
+                        <li key={index} style={{ marginBottom: '1rem' }}>
+                            Rent User: {rent.rentUser?.userName || "Unknown User"} <br />
+                            Rent Date: {rent.rentDate ? new Date(rent.rentDate).toLocaleDateString() : "Unknown Date"} <br />
+                            Rent Accessories:{" "}
+                            {Array.isArray(rent.rentAccessories) ? (
+                                rent.rentAccessories.map((accessory, idx) => (
+                                    <span key={idx} style={{ marginLeft: "10px" }}>
+                                        {accessory.accessoryName || "Unknown Accessory"}
+                                    </span>
+                                ))
+                            ) : (
+                                "No Accessories"
+                            )}
+                            {/* כפתור עדכון סטטוס - רק אם viewType === old */}
+                            {viewType === "old" && !rent.status && (
+                                <div style={{ marginTop: "10px" }}>
+                                    <Button
+                                        label="עדכן סטטוס ל-TRUE"
+                                        icon="pi pi-check"
+                                        className="p-button-success p-button-sm"
+                                        onClick={() => handleUpdateStatus(rent._id)}
+                                    />
+                                </div>
+                            )}
+                            {viewType === "old" && rent.status && (
+                                <div style={{ marginTop: "10px", color: "green", fontWeight: "bold" }}>
+                                    סטטוס: עודכן
+                                </div>
+                            )}
+                        </li>
+                    ))}
+                </ul>
             </div>
         </div>
     );

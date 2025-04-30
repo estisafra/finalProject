@@ -95,24 +95,103 @@ async function getAllRents(req, res) {
 async function getRentsByRenter(req, res) {
     const { renterId } = req.params; 
     try {
-        const rents = await Rent.find({rentRenter:renterId}).populate('rentUser').populate('rentAccessories').populate('rentRenter');
-        res.status(200).send({ rents: rents });
+        const now = new Date();
+        const rents = await Rent.find({
+            rentRenter: renterId,
+            rentReturnDate: { $gt: now } // רק השכרות שתאריך ההחזרה עוד לא עבר
+        })
+        .populate('rentUser')
+        .populate('rentAccessories')
+        .populate('rentRenter');
+
+        res.status(200).send({ rents });
     } catch (error) {
         console.error(error); 
         res.status(400).send(error.message);
     }
 }
-async function getRentsByUser(req, res) {
-    const{userId}=req.params;
-    try{
-        const rents = await Rent.find({rentUser:userId}).populate('rentUser').populate('rentAccessories').populate('rentRenter');
-        res.status(200).send({ rents: rents });
+async function getOldRentsByRenter(req, res) {
+    const { renterId } = req.params; 
+    try {
+        const now = new Date();
+        const rents = await Rent.find({
+            rentRenter: renterId,
+            rentReturnDate: { $lte: now } // רק השכרות שתאריך ההחזרה שלהן כבר עבר
+        })
+        .populate('rentUser')
+        .populate('rentAccessories')
+        .populate('rentRenter');
+
+        res.status(200).send({ rents });
+    } catch (error) {
+        console.error(error); 
+        res.status(400).send(error.message);
     }
-    catch{
+}
+
+async function getRentsByUser(req, res) {
+    const { userId } = req.params;
+    try {
+        const now = new Date();
+        const rents = await Rent.find({
+            rentUser: userId,
+            rentReturnDate: { $gt: now } // רק השכרות שעדיין לא עברו את תאריך ההחזרה
+        })
+        .populate('rentUser')
+        .populate('rentAccessories')
+        .populate('rentRenter');
+
+        res.status(200).send({ rents });
+    } catch (error) {
         console.error(error);
         res.status(400).send(error.message);
     }
 }
+
+async function getOldRentsByUser(req, res) {
+    const { userId } = req.params;
+    try {
+        const now = new Date();
+        const rents = await Rent.find({
+            rentUser: userId,
+            rentReturnDate: { $lte: now }
+        })
+        .populate('rentUser')
+        .populate('rentRenter')
+        .populate({
+            path: 'rentAccessories',
+            populate: {
+                path: 'accessoryRenter.renter',
+                model: 'Renters'
+            }
+        });
+
+        // סינון תמונות לפי המשכיר של ההשכרה
+        const enrichedRents = rents.map(rent => {
+            const accessoriesWithImage = rent.rentAccessories.map(accessory => {
+                const matching = accessory.accessoryRenter.find(ar => 
+                    ar.renter && ar.renter._id.toString() === rent.rentRenter._id.toString()
+                );
+                return {
+                    ...accessory.toObject(),
+                    matchedImage: matching?.image || null
+                };
+            });
+
+            return {
+                ...rent.toObject(),
+                rentAccessories: accessoriesWithImage
+            };
+        });
+
+        res.status(200).send({ rents: enrichedRents });
+    } catch (error) {
+        console.error(error);
+        res.status(400).send(error.message);
+    }
+}
+
+
 
 async function deleteRent(req, res) {
     try {
@@ -259,4 +338,4 @@ async function checkOrCreateRent(req, res) {
     }
 }
 
-module.exports={ deleteRent,createRent,addAccessory,getAllRents,updateRent,removeAccessory,getRentsByRenter,getRentsByUser,checkOrCreateRent}
+module.exports={ deleteRent,createRent,addAccessory,getAllRents,getOldRentsByUser, getOldRentsByRenter,updateRent,removeAccessory,getRentsByRenter,getRentsByUser,checkOrCreateRent}
