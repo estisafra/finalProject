@@ -236,7 +236,6 @@ async function checkOrCreateRent(req, res) {
         });
         await newRent.save();
         return res.status(201).send({ message: "New rent created" });
-        
     } catch (error) {
         console.error("Error checking or creating rent:", error);
         res.status(500).send(error.message);
