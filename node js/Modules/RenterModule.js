@@ -15,7 +15,7 @@ const renterModule = mongoose.Schema({
     },
     renterAccessory: [{
         accessory: { type: mongoose.Schema.Types.ObjectId, ref: 'Accessories' },
-        price: { type: String }
+        price: { type: Number }
     }],
     renterRents: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Rents' }]
 });

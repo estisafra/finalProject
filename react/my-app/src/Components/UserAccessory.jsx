@@ -48,7 +48,7 @@ const UserAccessory = () => {
         {
             label: "Orders",
             icon: "pi pi-file",
-            command: () => navigate("/orders"),
+            command: () => navigate("/userOrders"),
         },
         {
             label: "Home",
@@ -58,7 +58,7 @@ const UserAccessory = () => {
         {
             label: "Rents",
             icon: "pi pi-shopping-cart",
-            command: () => navigate("/rents"),
+            command: () => navigate("/userRents"),
         },
     ];
 

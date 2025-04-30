@@ -226,11 +226,15 @@ async function checkOrCreateRent(req, res) {
             rentRenter: renterId,
             rentUser: userId, // הוסף את userId לבדיקה
         });
+       const accessory=await Accessory.findById(accessoryId);
+        const renter = accessory.accessoryRenter.find(r => r.renter.toString() === renterId.toString());
+        const accessoryPrice = renter.price;
 
+        console.log("Accessory Price:", accessoryPrice); // הדפסת מחיר האביזר
         if (existingRent) {
-            // בדוק אם האביזר כבר קיים בהשכרה
             if (!existingRent.rentAccessories.includes(accessoryId)) {
                 existingRent.rentAccessories.push(accessoryId); // הוסף את האביזר להשכרה
+                existingRent.rentPrice += accessoryPrice; // עדכן את המחיר של ההשכרה
                 await existingRent.save();
                 return res.status(200).send({ message: "Accessory added to existing rent" });
             } else {
@@ -244,6 +248,8 @@ async function checkOrCreateRent(req, res) {
             rentRenter: renterId,
             rentUser: userId, // הוסף את userId להשכרה החדשה
             rentAccessories: [accessoryId],
+            rentPrice:accessoryPrice, // הנחה שהאביזר הוא אובייקט עם מחיר
+            rentReturnDate: new Date(new Date(rentDate).setDate(new Date(rentDate).getDate() + 1)), // הוסף יום אחד לתאריך השכרה
         });
         await newRent.save();
         return res.status(201).send({ message: "New rent created" });
