@@ -50,19 +50,21 @@ const RenterAccessories = () => {
     // עדכון הרשימה לאחר מחיקה
     const handleDeleteSuccess = () => {
         // עדכון הרשימה על ידי סינון האביזר שנמחק
-        setAccessories(prevAccessories => 
-            prevAccessories.filter(accessory => accessory.accessoryId !== deletingAccessoryId)
+        setAccessories((prevAccessories) =>
+            prevAccessories.filter((accessory) => accessory.accessoryId !== deletingAccessoryId)
         );
 
-        // הצגת הודעת הצלחה
+        setDeletingAccessoryId(null); // איפוס ה-ID של האביזר שנמחק
+    };
+
+    // טיפול בהודעות Toast
+    const handleMessage = (message) => {
         toast.current.show({
-            severity: 'success',
-            summary: 'Success',
-            detail: 'Accessory deleted successfully',
+            severity: message.severity,
+            summary: message.summary,
+            detail: message.detail,
             life: 3000,
         });
-
-        setDeletingAccessoryId(null); // איפוס ה-ID של האביזר שנמחק
     };
 
     // פריטי ה-Menubar
@@ -153,7 +155,7 @@ const RenterAccessories = () => {
                 }}
             />
             <div style={{ padding: "1rem" }}>
-            <button onClick={() => setShowAddAccessory(true)}>To add accessory</button>
+                <button onClick={() => setShowAddAccessory(true)}>To add accessory</button>
                 <h1>Renter Accessories</h1>
                 <ul>
                     {accessories.map((accessory) => (
@@ -179,6 +181,7 @@ const RenterAccessories = () => {
                     accessoryid={deletingAccessoryId}
                     onSuccess={handleDeleteSuccess}
                     onClose={() => setDeletingAccessoryId(null)}
+                    onMessage={handleMessage} // העברת הפונקציה להצגת הודעות
                 />
             )}
         </div>

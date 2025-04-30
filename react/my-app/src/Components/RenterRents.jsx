@@ -122,13 +122,23 @@ const RenterRents = () => {
             <div style={{ padding: "1rem" }}>
                 <h1>Renter Rents</h1>
                 <ul>
-                    {rents.map((rent, index) => (
-                        <li key={index}>
-                            Rent User: {rent.rentUser?.userName || "Unknown User"} <br />
-                            Rent Date: {new Date(rent.rentDate).toLocaleDateString()}
-                        </li>
-                    ))}
-                </ul>
+      {rents.map((rent, index) => (
+         <li key={index}>
+            Rent User: {rent.rentUser?.userName || "Unknown User"} <br />
+            Rent Date: {rent.rentDate ? new Date(rent.rentDate).toLocaleDateString() : "Unknown Date"} <br />
+            Rent Accessories:{" "}
+            {Array.isArray(rent.rentAccessories) ? (
+                rent.rentAccessories.map((accessory, index) => (
+                    <span key={index} style={{ marginLeft: "10px" }}>
+                        {accessory.accessoryName || "Unknown Accessory"}
+                    </span>
+                ))
+            ) : (
+                "No Accessories"
+            )}
+        </li>
+      ))}
+    </ul>
             </div>
         </div>
     );

@@ -81,8 +81,10 @@ const AccessoryDetails = () => {
             console.log("Rent check/create response:", response.data);
             if (response.data.message === "New rent created") {
                 alert("השכרה חדשה נפתחה בהצלחה!");
+                setOccupiedDates((prevDates) => [...prevDates, new Date(date)]); // עדכון התאריכים התפוסים
             } else if (response.data.message === "Accessory added to existing rent") {
                 alert("אביזר נוסף להשכרה קיימת!");
+                setOccupiedDates((prevDates) => [...prevDates, new Date(date)]); // עדכון התאריכים התפוסים
             } else if (response.data.message === "Accessory already exists in the rent") {
                 alert("אביזר זה כבר קיים בהשכרה!");
             }

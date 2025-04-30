@@ -138,18 +138,21 @@ async function deleteAccessoryFromRenter(req, res) {
     
     try {
         const renter = await Renters.findOne({ _id: new mongoose.Types.ObjectId(renterid), 'renterAccessory.accessory': new mongoose.Types.ObjectId(accessoryid) });
-console.log("Renter found:", renter);
+        console.log("Renter found:", renter);
         console.log("Checking for active rentals...");
         const activeRentals = await Rent.findOne({
-            rentUser: renterid,
+            rentRenter: renterid,
             rentAccessories: accessoryid,
-            rentReturnDate: { $exists: false } 
         });
 
         console.log("Active Rentals Found:", activeRentals);
 
         if (activeRentals) {
-            return res.status(400).send("Cannot delete the accessory while it is still rented.");
+            // החזרת תגובה עם סטטוס 200 והודעה מתאימה
+            return res.status(200).send({
+                success: false,
+                message: "Cannot delete the accessory while it is still rented."
+            });
         }
 
         console.log("Updating Renters...");
@@ -187,30 +190,28 @@ const getOccupiedDates = async (req, res) => {
         const { renterId, accessoryId, year, month } = req.query;
 
         // חישוב טווח התאריכים של החודש המבוקש
-        const startOfMonth = new Date(year, month, 1); // תחילת החודש
-        const endOfMonth = new Date(year, parseInt(month) + 1, 0); // סוף החודש
+        const startOfMonth = new Date(year, month - 1, 1); // month is 0-indexed
+        const endOfMonth = new Date(year, month, 0); // Last day of the month
 
         // שליפת השכרות עבור המשכיר והאביזר בטווח התאריכים
         const rents = await Rent.find({
             rentRenter: renterId,
             rentAccessories: accessoryId,
-            rentDate: { $gte: startOfMonth, $lte: endOfMonth }, // הגבלת התאריכים לטווח החודש
+            rentDate: { $lte: endOfMonth },
+            $or: [
+                { rentReturnDate: { $gte: startOfMonth } },
+                { rentReturnDate: null } // השכרות ללא תאריך החזרה
+            ]
         });
 
-        // יצירת מערך של כל התאריכים התפוסים
-        const occupiedDates = [];
-        rents.forEach((rent) => {
+        // יצירת מערך של טווחי תאריכים תפוסים
+        const occupiedRanges = rents.map((rent) => {
             const startDate = new Date(rent.rentDate);
             const endDate = rent.rentReturnDate ? new Date(rent.rentReturnDate) : startDate;
-
-            for (let date = new Date(startDate); date <= endDate; date.setDate(date.getDate() + 1)) {
-                if (date >= startOfMonth && date <= endOfMonth) { // ודא שהתאריך בטווח החודש
-                    occupiedDates.push(new Date(date)); // הוספת עותק של התאריך
-                }
-            }
+            return { startDate, endDate };
         });
 
-        res.status(200).json(occupiedDates);
+        res.status(200).json(occupiedRanges);
     } catch (error) {
         console.error("Error fetching occupied dates:", error);
         res.status(500).send(error.message);
