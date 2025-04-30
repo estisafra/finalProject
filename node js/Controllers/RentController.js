@@ -102,6 +102,17 @@ async function getRentsByRenter(req, res) {
         res.status(400).send(error.message);
     }
 }
+async function getRentsByUser(req, res) {
+    const{userId}=req.params;
+    try{
+        const rents = await Rent.find({rentUser:userId}).populate('rentUser').populate('rentAccessories').populate('rentRenter');
+        res.status(200).send({ rents: rents });
+    }
+    catch{
+        console.error(error);
+        res.status(400).send(error.message);
+    }
+}
 
 async function deleteRent(req, res) {
     try {
@@ -242,4 +253,4 @@ async function checkOrCreateRent(req, res) {
     }
 }
 
-module.exports={ deleteRent,createRent,addAccessory,getAllRents,updateRent,removeAccessory,getRentsByRenter,checkOrCreateRent}
+module.exports={ deleteRent,createRent,addAccessory,getAllRents,updateRent,removeAccessory,getRentsByRenter,getRentsByUser,checkOrCreateRent}

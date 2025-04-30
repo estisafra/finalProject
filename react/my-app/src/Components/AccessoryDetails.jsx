@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux"; // ייבוא useSelector
@@ -227,48 +228,48 @@ const AccessoryDetails = () => {
                 >
                     <h3 style={{ textAlign: "center", color: "black" }}>Select a Date</h3>
                     <Calendar
-                        value={selectedDate}
-                        onChange={(e) => {
-                            setSelectedDate(e.value);
-                            handleDateSelection(e.value);
-                        }}
-                        inline
-                        style={{ width: "100%" }}
-                        disabledDates={occupiedDates} // סימון תאריכים תפוסים
-                        onMonthChange={(e) => fetchOccupiedDates(e.year, e.month)} // קריאה לפונקציה בעת שינוי חודש
-                        dateTemplate={(date) => {
-                            const isOccupied = occupiedDates.some(
-                                (occupiedDate) =>
-                                    date.day === new Date(occupiedDate).getDate() &&
-                                    date.month === new Date(occupiedDate).getMonth() &&
-                                    date.year === new Date(occupiedDate).getFullYear()
-                            );
+                value={selectedDate}
+                onChange={(e) => {
+                    setSelectedDate(e.value);
+                    handleDateSelection(e.value);
+                }}
+                inline
+                style={{ width: "100%" }}
+                disabledDates={occupiedDates} // סימון תאריכים תפוסים
+                onMonthChange={(e) => fetchOccupiedDates(e.year, e.month)} // קריאה לפונקציה בעת שינוי חודש
+                dateTemplate={(date) => {
+                    const isOccupied = occupiedDates.some(
+                        (occupiedDate) =>
+                            date.day === new Date(occupiedDate).getDate() &&
+                            date.month === new Date(occupiedDate).getMonth() &&
+                            date.year === new Date(occupiedDate).getFullYear()
+                    );
 
-                            return (
-                                <div
-                                    style={{
-                                        backgroundColor: isOccupied ? "#f44336" : "transparent", // רקע אדום לימים תפוסים
-                                        color: isOccupied ? "white" : "black", // צבע טקסט
-                                        borderRadius: "50%",
-                                        width: "2rem",
-                                        height: "2rem",
-                                        display: "flex",
-                                        alignItems: "center",
-                                        justifyContent: "center",
-                                    }}
-                                >
-                                    {date.day}
-                                    {isOccupied && <span style={{ fontSize: "0.6rem", marginTop: "0.2rem" }}>תפוס</span>}
-                                </div>
-                            );
-                        }}
-                    />
-                    {selectedDate && (
-                        <p style={{ textAlign: "center", marginTop: "1rem", color: "black" }}>
-                            Selected Date: {selectedDate.toLocaleDateString()}
-                        </p>
-                    )}
-                </div>
+                    return (
+                        <div
+                            style={{
+                                backgroundColor: isOccupied ? "#f44336" : "transparent", // רקע אדום לימים תפוסים
+                                color: isOccupied ? "white" : "black", // צבע טקסט
+                                borderRadius: "50%",
+                                width: "2rem",
+                                height: "2rem",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                            }}
+                        >
+                            {date.day}
+                            {isOccupied && <span style={{ fontSize: "0.6rem", marginTop: "0.2rem" }}>תפוס</span>}
+                        </div>
+                    );
+                }}
+            />
+            {selectedDate && (
+                <p style={{ textAlign: "center", marginTop: "1rem", color: "black" }}>
+                    Selected Date: {selectedDate.toLocaleDateString()}
+                </p>
+            )}
+        </div>
 
                 {/* כרטיס בצד הימני */}
                 <Card
