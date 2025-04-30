@@ -187,19 +187,30 @@ const getOccupiedDates = async (req, res) => {
         const { renterId, accessoryId, year, month } = req.query;
 
         // חישוב טווח התאריכים של החודש המבוקש
-        const startOfMonth = new Date(year, month, 1);
-        const endOfMonth = new Date(year, month + 1, 0);
+        const startOfMonth = new Date(year, month, 1); // תחילת החודש
+        const endOfMonth = new Date(year, parseInt(month) + 1, 0); // סוף החודש
 
         // שליפת השכרות עבור המשכיר והאביזר בטווח התאריכים
-        const rents = await Rent.find({ 
-        // יצירת מערך של טווחי תאריכים תפוסים
-        const occupiedRanges = rents.map((rent) => {
-            const startDate = new Date(rent.rentDate);
-            const endDate = rent.rentReturnDate ? new Date(rent.rentReturnDate) : startDate;
-            return { startDate, endDate };
+        const rents = await Rent.find({
+            rentRenter: renterId,
+            rentAccessories: accessoryId,
+            rentDate: { $gte: startOfMonth, $lte: endOfMonth }, // הגבלת התאריכים לטווח החודש
         });
 
-        res.status(200).json(occupiedRanges);
+        // יצירת מערך של כל התאריכים התפוסים
+        const occupiedDates = [];
+        rents.forEach((rent) => {
+            const startDate = new Date(rent.rentDate);
+            const endDate = rent.rentReturnDate ? new Date(rent.rentReturnDate) : startDate;
+
+            for (let date = new Date(startDate); date <= endDate; date.setDate(date.getDate() + 1)) {
+                if (date >= startOfMonth && date <= endOfMonth) { // ודא שהתאריך בטווח החודש
+                    occupiedDates.push(new Date(date)); // הוספת עותק של התאריך
+                }
+            }
+        });
+
+        res.status(200).json(occupiedDates);
     } catch (error) {
         console.error("Error fetching occupied dates:", error);
         res.status(500).send(error.message);
