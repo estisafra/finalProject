@@ -26,7 +26,7 @@ async function createRenter(req, res) {
 async function getRenterById(req,res){
     try {
             const {_id} = req.params;
-            let renter = await Renter.findById(_id).populate('renterRents')
+            let renter = await Renter.findById(_id)
             if (!renter) {
                res.status(404).send(null);
             }

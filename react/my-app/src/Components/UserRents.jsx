@@ -4,6 +4,7 @@ import { Menubar } from "primereact/menubar";
 import { useNavigate } from "react-router-dom";
 import { Button } from "primereact/button";
 import axios from "axios";
+import { Dialog } from "primereact/dialog";
 
 const UserRents = () => {
     const [rents, setRents] = useState([]);
@@ -11,6 +12,9 @@ const UserRents = () => {
     const id = useSelector((state) => state.user.id);
     const userName = useSelector((state) => state.user.name);
     const [showProfileMenu, setShowProfileMenu] = useState(false);
+    const [showAccessoriesDialog, setShowAccessoriesDialog] = useState(false);
+    const [accessories, setAccessories] = useState([]);
+    const [currentRent, setCurrentRent] = useState(null); // Track the current rent
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -101,6 +105,25 @@ const UserRents = () => {
         </div>
     );
 
+    const fetchAccessories = (renterId, rent) => {
+        setCurrentRent(rent); // Set the current rent
+        const token = localStorage.getItem("token");
+        axios.get(`http://localhost:8080/Accessory/getAccessoryByRenter/${renterId}`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        })
+        .then((response) => {
+            console.log("Accessories fetched successfully:", response.data);
+            setAccessories(response.data);
+            setShowAccessoriesDialog(true);
+        })
+        .catch((error) => {
+            console.error("Error fetching accessories:", error);
+            alert("שגיאה בטעינת האביזרים.");
+        });
+    };
+
     return (
         <div>
             <Menubar model={items} start={start} end={end} style={{
@@ -143,11 +166,49 @@ const UserRents = () => {
                                 {rent.rentAccessories.map((acc) => (
                                     <div key={acc._id} style={{ textAlign: "center" }}>
                                         <img
-                                            src={acc.matchedImage || "https://via.placeholder.com/80"}
+                                            src={acc.matchedImage ? `http://localhost:8080/${acc.matchedImage}` : "https://via.placeholder.com/80"}
                                             alt={acc.accessoryName || "Accessory"}
                                             style={{ width: "80px", height: "80px", objectFit: "cover", borderRadius: "8px" }}
                                         />
                                         <p style={{ fontSize: "0.8rem" }}>{acc.accessoryName || "ללא שם"}</p>
+                                        {viewType === "current" && (
+                                            <Button
+                                                icon="pi pi-trash"
+                                                className="p-button-danger p-button-sm"
+                                                onClick={() => {
+                                                    const token = localStorage.getItem("token");
+                                                    axios.put(`http://localhost:8080/Rent/removeAccessory/${id}/${rent.rentRenter._id}`, {
+                                                        accessoryId: acc._id,
+                                                        rentDate: rent.rentDate
+                                                    }, {
+                                                        headers: {
+                                                            Authorization: `Bearer ${token}`
+                                                        }
+                                                    })
+                                                    .then((response) => {
+                                                        if (response.data === "השכרה נמחקה בהצלחה.") {
+                                                            alert("השכרה נמחקה בהצלחה.");
+                                                            setRents((prevRents) => prevRents.filter(r => r._id !== rent._id));
+                                                        } else {
+                                                            alert("אביזר נמחק בהצלחה מהשכרה.");
+                                                            setRents((prevRents) => prevRents.map(r => {
+                                                                if (r._id === rent._id) {
+                                                                    return {
+                                                                        ...r,
+                                                                        rentAccessories: r.rentAccessories.filter(a => a._id !== acc._id)
+                                                                    };
+                                                                }
+                                                                return r;
+                                                            }));
+                                                        }
+                                                    })
+                                                    .catch((error) => {
+                                                        console.error("Error removing accessory:", error);
+                                                        alert("שגיאה במחיקת האביזר.");
+                                                    });
+                                                }}
+                                            />
+                                        )}
                                     </div>
                                 ))}
                             </div>
@@ -160,15 +221,96 @@ const UserRents = () => {
                                     icon="pi pi-times"
                                     className="p-button-danger p-button-sm"
                                     onClick={() => {
-                                        console.log("Cancel rent:", rent._id);
-                                        // פה אפשר להוסיף קריאה לשרת לביטול
+                                        const token = localStorage.getItem("token");
+                                        axios.delete(`http://localhost:8080/Rent/deleteRent/${rent._id}`, {
+                                            headers: {
+                                                Authorization: `Bearer ${token}`
+                                            }
+                                        })
+                                        .then((response) => {
+                                            if (response.data === "השכרה נמחקה בהצלחה.") {
+                                                alert("השכרה נמחקה בהצלחה.");
+                                                setRents((prevRents) => prevRents.filter(r => r._id !== rent._id));
+                                            } else {
+                                                alert("שגיאה במחיקת ההשכרה.");
+                                            }
+                                        })
+                                        .catch((error) => {
+                                            console.error("Error deleting rent:", error);
+                                            alert("שגיאה במחיקת ההשכרה.");
+                                        });
                                     }}
+                                />
+                                <Button
+                                    icon="pi pi-plus"
+                                    className="p-button-success p-button-sm"
+                                    style={{ backgroundColor: "#28a745", color: "white" }}
+                                    onClick={() => fetchAccessories(rent.rentRenter._id, rent)} // Pass the current rent
                                 />
                             </div>
                         )}
                     </div>
                 ))}
             </div>
+
+            <Dialog
+                header="אביזרים"
+                visible={showAccessoriesDialog}
+                style={{ width: "50vw" }}
+                onHide={() => setShowAccessoriesDialog(false)}
+            >
+                {accessories.length > 0 ? (
+                    <ul>
+                        {accessories.map((accessory) => (
+                                <li key={accessory.accessoryId} style={{ display: "flex", alignItems: "center", marginBottom: "10px" }}>
+                                    <img
+                                        src={accessory.image ? `http://localhost:8080${accessory.image}` : "https://via.placeholder.com/80"}
+                                        alt={accessory.accessoryName}
+                                        style={{ width: "50px", height: "50px", marginRight: "10px", objectFit: "cover", borderRadius: "8px" }}
+                                    />
+                                    <span style={{ flex: 1 }}>{accessory.accessoryName} - {accessory.price ? `${accessory.price} ₪` : "לא זמין"}</span>
+                                    <Button
+                                        icon="pi pi-check"
+                                        className="p-button-success p-button-sm"
+                                        style={{ marginLeft: "10px" }}
+                                        onClick={() => {
+                                            const token = localStorage.getItem("token");
+                                            axios.put(`http://localhost:8080/Rent/addAccessory/${id}/${currentRent.rentRenter._id}`, {
+                                                accessoryId: accessory.accessoryId,
+                                                rentDate: currentRent.rentDate
+                                            }, {
+                                                headers: {
+                                                    Authorization: `Bearer ${token}`
+                                                }
+                                            })
+                                            .then((response) => {
+                                                alert("אביזר נוסף בהצלחה להשכרה.");
+                                                setRents((prevRents) => prevRents.map(r => {
+                                                    if (r._id === currentRent._id) {
+                                                        return {
+                                                            ...r,
+                                                            rentAccessories: [...r.rentAccessories, {
+                                                                ...accessory,
+                                                                matchedImage: response.data.accessory.matchedImage // הוספת matchedImage מהתגובה
+                                                            }]
+                                                        };
+                                                    }
+                                                    return r;
+                                                }));
+                                            })
+                                            .catch((error) => {
+                                                console.error("Error adding accessory:", error);
+                                                alert("שגיאה בהוספת האביזר להשכרה.");
+                                            });
+                                        }}
+                                    />
+                                </li>
+                        ))}
+                    </ul>
+                ) : (
+                    <p>לא נמצאו אביזרים.</p>
+                )}
+            </Dialog>
         </div>
     );
 };

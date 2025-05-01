@@ -9,8 +9,6 @@ import SendEmails from './Components/SendEmails';
 const Home = lazy(() => import("./Components/Home"));
 const Login = lazy(() => import("./Components/Login"));
 const RegisterPhotography = lazy(() => import("./Components/RegisterPhotography"));
-const RegisterRenter = lazy(() => import("./Components/RegisterRenter"));
-const RegisterUser = lazy(() => import("./Components/RegisterUser"));
 const RenterHome = lazy(() => import("./Components/RenterHome"));
 const UserHome = lazy(() => import("./Components/UserHome"));
 const PhotographyHome = lazy(() => import("./Components/PhotographyHome"));
@@ -21,6 +19,7 @@ const UserAccessory = lazy(() => import("./Components/UserAccessory"));
 const AccessoryDetails = lazy(() => import("./Components/AccessoryDetails"));
 const UserRents = lazy(() => import("./Components/UserRents"));
 const UserOrders = lazy(() => import("./Components/UserOrders"));
+const Register = lazy(() => import("./Components/Register"));
 function App() {
   
   return (
@@ -29,8 +28,6 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register-photography" element={<RegisterPhotography />} />
-        <Route path="/register-renter" element={<RegisterRenter />} />
-        <Route path="/register-user" element={<RegisterUser />} />
         <Route path="/renterHome" element={<RenterHome />} />
         <Route path="/userHome" element={<UserHome />} />
         <Route path="/photographyHome" element={<PhotographyHome />} />
@@ -42,6 +39,7 @@ function App() {
         <Route path="/userRents" element={<UserRents />} />
         <Route path="/sendEmails" element={<SendEmails />} />
         <Route path="/userOrders" element={<UserOrders/>}/>
+        <Route path="/register" element={<Register />} />
       </Routes>
     </Suspense>
   

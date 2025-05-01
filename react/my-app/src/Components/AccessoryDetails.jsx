@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux"; // ייבוא useSelector
@@ -6,6 +5,7 @@ import { Menubar } from "primereact/menubar";
 import { Card } from "primereact/card";
 import { Button } from "primereact/button";
 import { Calendar } from "primereact/calendar";
+import { Dialog } from "primereact/dialog";
 import axios from "axios";
 
 const AccessoryDetails = () => {
@@ -15,6 +15,8 @@ const AccessoryDetails = () => {
     const [selectedDate, setSelectedDate] = useState(null); // תאריך שנבחר
     const [occupiedDates, setOccupiedDates] = useState([]); // תאריכים תפוסים
     const [showProfileMenu, setShowProfileMenu] = useState(false); // שליטה על תפריט הפרופיל
+    const [accessories, setAccessories] = useState([]); // אביזרים נוספים
+    const [showAccessoriesDialog, setShowAccessoriesDialog] = useState(false); // הצגת דיאלוג אביזרים נוספים
 
     // שליפת שם המשתמש מה-Redux Store
     const userName = useSelector((state) => state.user.name); // שימוש ב-useSelector
@@ -83,6 +85,9 @@ const AccessoryDetails = () => {
             if (response.data.message === "New rent created") {
                 alert("השכרה חדשה נפתחה בהצלחה!");
                 setOccupiedDates((prevDates) => [...prevDates, new Date(date)]); // עדכון התאריכים התפוסים
+                if (window.confirm("האם תרצה לראות אביזרים נוספים ממשכיר זה?")) {
+                    navigate("/userAccessory", { state: { renterId } });
+                }
             } else if (response.data.message === "Accessory added to existing rent") {
                 alert("אביזר נוסף להשכרה קיימת!");
                 setOccupiedDates((prevDates) => [...prevDates, new Date(date)]); // עדכון התאריכים התפוסים
@@ -121,7 +126,7 @@ const AccessoryDetails = () => {
         {
             label: "Rents",
             icon: "pi pi-shopping-cart",
-            command: () => navigate("/rents"),
+            command: () => navigate("/userRents"),
         },
     ];
 

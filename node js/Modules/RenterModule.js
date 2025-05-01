@@ -17,7 +17,6 @@ const renterModule = mongoose.Schema({
         accessory: { type: mongoose.Schema.Types.ObjectId, ref: 'Accessories' },
         price: { type: Number }
     }],
-    renterRents: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Rents' }]
 });
 
 module.exports = mongoose.model("Renters", renterModule);

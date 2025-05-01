@@ -29,7 +29,10 @@ async function addAccessory(req, res) {
             return res.status(400).send("rentDate is required.");
         }
         
-        const accessory = await Accessory.findById(req.body.accessoryId);
+        const accessory = await Accessory.findById(req.body.accessoryId).populate({
+            path: 'accessoryRenter.renter',
+            model: 'Renters'
+        });
         if (!accessory) {
             return res.status(404).send("אביזר לא נמצא.");
         }
@@ -37,14 +40,12 @@ async function addAccessory(req, res) {
         const inputDate = new Date(req.body.rentDate).toISOString();  // המרת התאריך לפורמט ISO
         
         // בדוק אם התאריך תפוס
-      const dateExists = accessory.accessoryRent.some(rent => {
-      const rentDate = new Date(rent.date);
-      const rentReturnDate = new Date(rent.returnDate); // הנחה שיש תאריך החזרה
-      const inputDate = new Date(inputDate); // הנחה ש-inputDate הוא תאריך קלט
-
-    return (inputDate >= rentDate && inputDate <= rentReturnDate) && 
-           rent.renter.toString() === renterId; // בדיקה ישירה מול השוכר
-});
+        const dateExists = accessory.accessoryRent.some(rent => {
+            const rentDate = new Date(rent.date);
+            const rentReturnDate = new Date(rent.returnDate); // הנחה שיש תאריך החזרה
+            return (inputDate >= rentDate && inputDate <= rentReturnDate) && 
+                   rent.renter.toString() === renterId; // בדיקה ישירה מול השוכר
+        });
 
         if (dateExists) {  // אם נמצא תאריך תפוס, הימנע מהוספה
             return res.status(409).send("תאריך זה כבר תפוס עבור השוכר.");
@@ -67,21 +68,28 @@ async function addAccessory(req, res) {
         rent.rentRenter = renterId; 
         await rent.save();
 
-        // עדכון השוכרים
-        const renter = await Renter.findById(renterId);
-        renter.renterRents.push(rent._id); 
-        await renter.save();
-
         // עדכון היסטוריית השכרת האביזר
         accessory.accessoryRent.push({ date: req.body.rentDate, renter: renterId });
         await accessory.save();
 
-        res.status(201).send({ rent: rent });
+        // מציאת התמונה המתאימה לפי המשכיר
+        const matching = accessory.accessoryRenter.find(ar => 
+            ar.renter && ar.renter._id.toString() === renterId.toString()
+        );
+        const matchedImage = matching?.image || null;
+
+        res.status(201).send({ 
+            rent: rent, 
+            accessory: {
+                ...accessory.toObject(),
+                matchedImage: matchedImage
+            }
+        });
     } catch (error) {
+        console.error("Error in addAccessory:", error.message);
         res.status(400).send(error.message);
     }
 }
-
 
 async function getAllRents(req, res) {
     try {
@@ -138,10 +146,34 @@ async function getRentsByUser(req, res) {
             rentReturnDate: { $gt: now } // רק השכרות שעדיין לא עברו את תאריך ההחזרה
         })
         .populate('rentUser')
-        .populate('rentAccessories')
-        .populate('rentRenter');
+        .populate('rentRenter')
+        .populate({
+            path: 'rentAccessories',
+            populate: {
+                path: 'accessoryRenter.renter',
+                model: 'Renters'
+            }
+        });
 
-        res.status(200).send({ rents });
+        // סינון תמונות לפי המשכיר של ההשכרה
+        const enrichedRents = rents.map(rent => {
+            const accessoriesWithImage = rent.rentAccessories.map(accessory => {
+                const matching = accessory.accessoryRenter.find(ar => 
+                    ar.renter && ar.renter._id.toString() === rent.rentRenter._id.toString()
+                );
+                return {
+                    ...accessory.toObject(),
+                    matchedImage: matching?.image || null
+                };
+            });
+
+            return {
+                ...rent.toObject(),
+                rentAccessories: accessoriesWithImage
+            };
+        });
+
+        res.status(200).send({ rents: enrichedRents });
     } catch (error) {
         console.error(error);
         res.status(400).send(error.message);
@@ -209,10 +241,10 @@ async function deleteRent(req, res) {
         }
 
         // עדכון טבלת Renters
-        await Renter.updateOne(
-            { renterRent: rentId },
-            { $pull: { renterRents: rentId } }
-        );
+        // await Renter.updateOne(
+        //     { renterRent: rentId },
+        //     { $pull: { renterRents: rentId } }
+        // );
 
         // עדכון טבלת Users
         if (rent.rentUser) { // בדוק אם rentUser קיים
@@ -289,12 +321,20 @@ async function removeAccessory(req, res) {
         accessory.accessoryRent = accessory.accessoryRent.filter(rent => rent.renter.toString() !== renterId || rent.date !== rentDate);
         await accessory.save();
 
+        // בדוק אם אין יותר אביזרים בהשכרה
+        if (rent.rentAccessories.length === 0) {
+            // קרא לפונקציה deleteRent כדי למחוק את ההשכרה
+            await deleteRent({ params: { rentId: rent._id } }, res);
+            return; // עצור כאן כדי למנוע הודעה נוספת
+        }
+
+        // אם ההשכרה לא נמחקה, החזר הודעה על מחיקת האביזר
         res.status(200).send("אביזר נמחק בהצלחה מהשכרה.");
     } catch (error) {
+        console.error("Error in removeAccessory:", error.message);
         res.status(400).send(error.message);
     }
 }
-
 async function checkOrCreateRent(req, res) {
     try {
         const { rentDate, renterId, accessoryId, userId } = req.body;
