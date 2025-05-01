@@ -104,7 +104,7 @@ const RenterHome = () => {
                     backgroundColor: "#008080",
                     color: "white",
                     borderBottom: "2px solid #005757",
-                    height: "70px", // גובה מוגדל
+                    height: "100px", // גובה מוגדל
                     width: "100%",
                 }}
             />

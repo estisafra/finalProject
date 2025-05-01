@@ -1,4 +1,5 @@
-const _ = require('lodash');
+
+const _= require('lodash');
 const mongoose = require('mongoose');
 const Accessory=require("../Modules/AccessoryModule")
 const Renters = require("../Modules/RenterModule");
@@ -7,7 +8,7 @@ const Rent=require("../Modules/RentModule");
 async function createAccessory(req, res)  {
     try {
         const accessory = new Accessory(req.body);
-        
+       
         await accessory.save();
         res.status(201).send({accessory:accessory});
     } catch (error) {
@@ -17,7 +18,7 @@ async function createAccessory(req, res)  {
 async function deleteAccessory(req, res) {
     try {
         let { id } = req.params;
-        
+       
         // בדוק אם האביזר מושכר
         let rents = await Rent.find({ rentAccessories: id });
         if (rents.length > 0) {
@@ -97,21 +98,21 @@ async function getAccessoryByRenter(req, res) {
 
 async function getAccessoryRentersDetails(req, res) {
     try {
-        const { accessoryId } = req.params; 
-        const accessory = await Accessory.findById(accessoryId).populate('accessoryRenter.renter'); 
+        const { accessoryId } = req.params;
+        const accessory = await Accessory.findById(accessoryId).populate('accessoryRenter.renter');
 
         if (!accessory) {
-            return res.status(404).send(null); 
+            return res.status(404).send(null);
         } else {
             const rentersDetails = accessory.accessoryRenter.map(r => ({
                 name: r.renter.renterName,
                 address: r.renter.renterAddress,
-                prices: r.renter.renterAccessory.map(a => a.price) 
+                prices: r.renter.renterAccessory.map(a => a.price)
             }));
             return res.status(200).send(rentersDetails);
         }
     } catch (error) {
-        return res.status(500).send(error.message); 
+        return res.status(500).send(error.message);
     }
 }
 
@@ -124,7 +125,7 @@ async function updateAccessory(req, res) {
             return res.status(404).send(null);
         }
         _.assign(accessory, req.body);
-        await accessory.save(); 
+        await accessory.save();
         res.status(200).send(accessory);
     } catch (error) {
         res.status(500).send(error.message);
@@ -135,21 +136,24 @@ async function deleteAccessoryFromRenter(req, res) {
     let accessoryid = req.body.accessoryid;
     console.log("Renter ID:", renterid);
     console.log("Accessory ID:", accessoryid);
-    
+   
     try {
         const renter = await Renters.findOne({ _id: new mongoose.Types.ObjectId(renterid), 'renterAccessory.accessory': new mongoose.Types.ObjectId(accessoryid) });
 console.log("Renter found:", renter);
         console.log("Checking for active rentals...");
         const activeRentals = await Rent.findOne({
-            rentUser: renterid,
+            rentRenter: renterid,
             rentAccessories: accessoryid,
-            rentReturnDate: { $exists: false } 
         });
 
         console.log("Active Rentals Found:", activeRentals);
 
-        if (activeRentals) {
-            return res.status(400).send("Cannot delete the accessory while it is still rented.");
+         if (activeRentals) {
+            // החזרת תגובה עם סטטוס 200 והודעה מתאימה
+            return res.status(200).send({
+                success: false,
+                message: "Cannot delete the accessory while it is still rented."
+            });
         }
 
         console.log("Updating Renters...");
@@ -162,7 +166,7 @@ console.log("Renter found:", renter);
         console.log("Updating Accessory...");
         await Accessory.updateOne(
             { _id: new mongoose.Types.ObjectId(accessoryid) },
-            { $pull: { accessoryRenter: { renter: renterid } } } 
+            { $pull: { accessoryRenter: { renter: renterid } } }
         );
 
         console.log("Counting renters for accessory...");
@@ -182,5 +186,46 @@ console.log("Renter found:", renter);
     }
 }
 
+const getOccupiedDates = async (req, res) => {
+    try {
+        const { renterId, accessoryId, year, month } = req.query;
 
-module.exports={createAccessory,getAccessoryByRenter,deleteAccessory,getAccessoryByGallery,updateAccessory,deleteAccessoryFromRenter,getAccessoryRentersDetails,getAllAccessory}
+        // חישוב טווח התאריכים של החודש המבוקש
+        const startOfMonth = new Date(year, month, 1); // תחילת החודש
+        const endOfMonth = new Date(year, parseInt(month) + 1, 0); // סוף החודש
+
+        // שליפת השכרות עבור המשכיר והאביזר בטווח התאריכים
+        const rents = await Rent.find({
+            rentRenter: renterId,
+            rentAccessories: accessoryId,
+            rentDate: { $gte: startOfMonth, $lte: endOfMonth }, // הגבלת התאריכים לטווח החודש
+        });
+
+        // יצירת מערך של כל התאריכים התפוסים
+        const occupiedDates = [];
+        rents.forEach((rent) => {
+            const startDate = new Date(rent.rentDate);
+            const endDate = rent.rentReturnDate ? new Date(rent.rentReturnDate) : startDate;
+            for (let date = new Date(startDate); date <= endDate; date.setDate(date.getDate() + 1)) {
+                if (date >= startOfMonth && date <= endOfMonth) { // ודא שהתאריך בטווח החודש
+                    occupiedDates.push(new Date(date)); // הוספת עותק של התאריך
+                }
+            }
+
+
+
+
+       
+        });
+
+        res.status(200).json(occupiedDates);
+    } catch (error) {
+        console.error("Error fetching occupied dates:", error);
+        res.status(500).send(error.message);
+    }
+};
+
+
+
+
+module.exports={createAccessory,getAccessoryByRenter,deleteAccessory,getAccessoryByGallery,updateAccessory,deleteAccessoryFromRenter,getAccessoryRentersDetails,getAllAccessory,getOccupiedDates }

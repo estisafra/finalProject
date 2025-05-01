@@ -1,5 +1,6 @@
 const Renter=require("../Modules/RenterModule");
 const Accessory=require("../Modules/AccessoryModule")
+const Rent = require("../Modules/RentModule");
 const { createAccessory } = require("../Controllers/AccessoryController");
 const bcrypt = require("bcryptjs");
 
@@ -25,7 +26,7 @@ async function createRenter(req, res) {
 async function getRenterById(req,res){
     try {
             const {_id} = req.params;
-            let renter = await Renter.findById(_id).populate('renterRents')
+            let renter = await Renter.findById(_id)
             if (!renter) {
                res.status(404).send(null);
             }
@@ -91,4 +92,26 @@ async function addAccessory(req, res) {
         console.error("Error adding accessory:", error);
         res.status(500).send(error.message);
     }
-}module.exports={createRenter,getRenterById,addAccessory,updatePersonalDetails}
+}
+    async function updateRentStatusToTrue(req, res) {
+        const { rentId } = req.params;
+    
+        try {
+            const updatedRent = await Rent.findByIdAndUpdate(
+                rentId,
+                { status: true },
+                { new: true } // מחזיר את המסמך המעודכן
+            );
+    
+            if (!updatedRent) {
+                return res.status(404).send({ message: "השכרה לא נמצאה" });
+            }
+    
+            res.status(200).send({ message: "הסטטוס עודכן בהצלחה", rent: updatedRent });
+        } catch (error) {
+            console.error(error);
+            res.status(400).send({ message: error.message });
+        }
+    }
+    
+module.exports={createRenter,getRenterById,addAccessory,updatePersonalDetails,updateRentStatusToTrue}

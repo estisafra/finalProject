@@ -32,11 +32,9 @@ const Login = () => {
 
     const handleRoleSelection = (selectedRole) => {
         if (selectedRole === "Photographer") {
-            navigate("/register-photography", { state: { name, email, password } });
-        } else if (selectedRole === "Renter") {
-            navigate("/register-renter", { state: { name, email, password } });
-        } else if (selectedRole === "User") {
-            navigate("/register-user", { state: { name, email, password } });
+            navigate("/register-photography", { state: { name, email, password, userType: selectedRole } });
+        } else {
+            navigate("/register", { state: { name, email, password, userType: selectedRole } });
         }
     };
 
@@ -149,7 +147,6 @@ const Login = () => {
         } catch (error) {
             if (error.response) {
                 if (error.response.status === 400 || error.response.status === 404) {
-                    alert("Login failed. Please select your role.");
                     setShowRoleSelection(true);
                 } else if (error.response.status === 300) {
                     alert("Incorrect password. Please try again.");
@@ -180,7 +177,7 @@ const Login = () => {
                     backgroundColor: "#008080",
                     color: "white",
                     borderBottom: "2px solid #005757",
-                    height: "70px",
+                    height: "100px",
                 }}
             />
             <div

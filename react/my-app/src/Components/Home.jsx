@@ -34,20 +34,22 @@ const Home = () => {
     const end = (
         <div style={{ position: "relative" }}>
             <div
-               style={{
-                position: "absolute",
-                top: "50px",
-                right: "0",
-                backgroundColor: "#005757",
-                color: "white",
-                padding: "0.5rem",
-                borderRadius: "8px",
-                boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
-                zIndex: 1000,
-            }}
+                style={{
+                    width: "50px",
+                    height: "50px",
+                    borderRadius: "50%",
+                    backgroundColor: "#008080",
+                    color: "white",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontWeight: "bold",
+                    fontSize: "1.2rem",
+                    cursor: "pointer",
+                }}
                 onClick={() => setShowProfileMenu(!showProfileMenu)}
             >
-                {userName?.charAt(0).toUpperCase()}
+                {userName?.charAt(0).toUpperCase() || "?"}
             </div>
             {showProfileMenu && (
                 <div
@@ -63,13 +65,16 @@ const Home = () => {
                         zIndex: 1000,
                     }}
                 >
-                    <p style={{ margin: 0, fontWeight: "bold" }}>{userName}</p>
+                    <p style={{ margin: 0, fontWeight: "bold" }}>{userName || "Guest"}</p>
                     <Button
-                        label="Login"
-                        icon="pi pi-sign-in"
+                        label="Logout"
+                        icon="pi pi-sign-out"
                         className="p-button-text"
                         style={{ color: "#fff", fontWeight: "bold", marginTop: "0.5rem" }}
-                        onClick={handleLogin}
+                        onClick={() => {
+                            localStorage.removeItem("token");
+                            navigate("/login");
+                        }}
                     />
                 </div>
             )}
@@ -95,7 +100,7 @@ const Home = () => {
                     backgroundColor: "#008080",
                     color: "white",
                     borderBottom: "2px solid #005757",
-                    height: "70px", // גובה מוגדל
+                    height: "100px", // גובה מוגדל
                     width: "100%",
                 }}
             />
