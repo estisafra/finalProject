@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
-import { Menubar } from "primereact/menubar";
-import { useNavigate } from "react-router-dom";
-import { Button } from "primereact/button";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import { Menubar } from "primereact/menubar";
+import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
+import { DataTable } from 'primereact/datatable';
+import { Column } from 'primereact/column';
+        
 
 const UserRents = () => {
     const [rents, setRents] = useState([]);
@@ -151,78 +154,76 @@ const UserRents = () => {
                     />
                 </div>
 
-                {rents.map((rent) => (
-                    <div key={rent._id} className="rent-card" style={{ border: "1px solid #ccc", padding: "1rem", marginBottom: "1rem" }}>
-                        <h3>Rent ID: {rent._id}</h3>
-                        <p>Renter ID: {rent.rentRenter ? rent.rentRenter._id : 'N/A'}</p>
-                        <p>User ID: {rent.rentUser ? rent.rentUser._id : 'N/A'}</p>
-                        <p>Start Date: {new Date(rent.rentDate).toLocaleDateString()}</p>
-                        <p>End Date: {rent.rentReturnDate ? new Date(rent.rentReturnDate).toLocaleDateString() : 'N/A'}</p>
-                        <p>Price: {rent.rentPrice ?? 0}</p>
-                        <p>סטטוס: {rent.status != null ? (rent.status ? "מאושר" : "ממתין") : "לא ידוע"}</p>
-
-                        {rent.rentAccessories?.length > 0 && (
-                            <div style={{ display: "flex", gap: "10px", marginTop: "10px", flexWrap: "wrap" }}>
-                                {rent.rentAccessories.map((acc) => (
-                                    <div key={acc._id} style={{ textAlign: "center" }}>
+                <DataTable value={rents} tableStyle={{ minWidth: '60rem' }}>
+                    <Column
+                        header="Images"
+                        body={(rowData) => (
+                            <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+                                {rowData.rentAccessories?.map((accessory, index) => (
+                                    <div key={index} style={{ position: "relative" }}>
                                         <img
-                                            src={acc.matchedImage ? `http://localhost:8080/${acc.matchedImage}` : "https://via.placeholder.com/80"}
-                                            alt={acc.accessoryName || "Accessory"}
-                                            style={{ width: "80px", height: "80px", objectFit: "cover", borderRadius: "8px" }}
+                                            src={accessory.matchedImage ? `http://localhost:8080/${accessory.matchedImage}` : "https://via.placeholder.com/80"}
+                                            alt="Accessory"
+                                            style={{ width: "70px", height: "70px", objectFit: "cover", borderRadius: "8px", cursor: "pointer" }}
+                                            title="Click to delete"
+                                            onClick={() => {
+                                                const token = localStorage.getItem("token");
+                                                axios.delete(`http://localhost:8080/Accessory/deleteAccessory/${accessory.accessoryId}`, {
+                                                    headers: {
+                                                        Authorization: `Bearer ${token}`
+                                                    }
+                                                })
+                                                .then((response) => {
+                                                    alert("Accessory deleted successfully.");
+                                                    setRents((prevRents) => prevRents.map(rent => {
+                                                        if (rent._id === rowData._id) {
+                                                            return {
+                                                                ...rent,
+                                                                rentAccessories: rent.rentAccessories.filter((_, i) => i !== index)
+                                                            };
+                                                        }
+                                                        return rent;
+                                                    }));
+                                                })
+                                                .catch((error) => {
+                                                    console.error("Error deleting accessory:", error);
+                                                    alert("Error deleting accessory.");
+                                                });
+                                            }}
                                         />
-                                        <p style={{ fontSize: "0.8rem" }}>{acc.accessoryName || "ללא שם"}</p>
-                                        {viewType === "current" && (
-                                            <Button
-                                                icon="pi pi-trash"
-                                                className="p-button-danger p-button-sm"
-                                                onClick={() => {
-                                                    const token = localStorage.getItem("token");
-                                                    axios.put(`http://localhost:8080/Rent/removeAccessory/${id}/${rent.rentRenter._id}`, {
-                                                        accessoryId: acc._id,
-                                                        rentDate: rent.rentDate
-                                                    }, {
-                                                        headers: {
-                                                            Authorization: `Bearer ${token}`
-                                                        }
-                                                    })
-                                                    .then((response) => {
-                                                        if (response.data === "השכרה נמחקה בהצלחה.") {
-                                                            alert("השכרה נמחקה בהצלחה.");
-                                                            setRents((prevRents) => prevRents.filter(r => r._id !== rent._id));
-                                                        } else {
-                                                            alert("אביזר נמחק בהצלחה מהשכרה.");
-                                                            setRents((prevRents) => prevRents.map(r => {
-                                                                if (r._id === rent._id) {
-                                                                    return {
-                                                                        ...r,
-                                                                        rentAccessories: r.rentAccessories.filter(a => a._id !== acc._id)
-                                                                    };
-                                                                }
-                                                                return r;
-                                                            }));
-                                                        }
-                                                    })
-                                                    .catch((error) => {
-                                                        console.error("Error removing accessory:", error);
-                                                        alert("שגיאה במחיקת האביזר.");
-                                                    });
-                                                }}
-                                            />
-                                        )}
                                     </div>
                                 ))}
                             </div>
                         )}
-
-                        {viewType === "current" && (
-                            <div style={{ marginTop: "10px" }}>
+                    ></Column>
+                    <Column field="_id" header="Order Code"></Column>
+                    <Column
+                        header="Date"
+                        body={(rowData) => new Date(rowData.rentDate).toLocaleDateString()}
+                    ></Column>
+                    <Column
+                        header="Status"
+                        body={(rowData) => rowData.status != null ? (rowData.status ? "Approved" : "Pending") : "Unknown"}
+                    ></Column>
+                    <Column
+                        header="Total Price"
+                        body={(rowData) => rowData.rentAccessories?.reduce((total, accessory) => total + (accessory.price || 0), 0) + (rowData.rentPrice || 0)}
+                    ></Column>
+                    <Column
+                        header="Actions"
+                        body={(rowData) => (
+                            <div style={{ display: "flex", gap: "10px" }}>
                                 <Button
-                                    label="בטל"
-                                    icon="pi pi-times"
+                                    icon="pi pi-plus"
+                                    className="p-button-success p-button-sm"
+                                    onClick={() => fetchAccessories(rowData.rentRenter._id, rowData)}
+                                />
+                                <Button
+                                    icon="pi pi-trash"
                                     className="p-button-danger p-button-sm"
                                     onClick={() => {
                                         const token = localStorage.getItem("token");
-                                        axios.delete(`http://localhost:8080/Rent/deleteRent/${rent._id}`, {
+                                        axios.delete(`http://localhost:8080/Rent/deleteRent/${rowData._id}`, {
                                             headers: {
                                                 Authorization: `Bearer ${token}`
                                             }
@@ -230,7 +231,7 @@ const UserRents = () => {
                                         .then((response) => {
                                             if (response.data === "השכרה נמחקה בהצלחה.") {
                                                 alert("השכרה נמחקה בהצלחה.");
-                                                setRents((prevRents) => prevRents.filter(r => r._id !== rent._id));
+                                                setRents((prevRents) => prevRents.filter(r => r._id !== rowData._id));
                                             } else {
                                                 alert("שגיאה במחיקת ההשכרה.");
                                             }
@@ -241,16 +242,10 @@ const UserRents = () => {
                                         });
                                     }}
                                 />
-                                <Button
-                                    icon="pi pi-plus"
-                                    className="p-button-success p-button-sm"
-                                    style={{ backgroundColor: "#28a745", color: "white" }}
-                                    onClick={() => fetchAccessories(rent.rentRenter._id, rent)} // Pass the current rent
-                                />
                             </div>
                         )}
-                    </div>
-                ))}
+                    ></Column>
+                </DataTable>
             </div>
 
             <Dialog

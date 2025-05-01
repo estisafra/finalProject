@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { saveUser } from "../Store/UserSlice";
 import { Menubar } from "primereact/menubar";
 import { Button } from "primereact/button";
+import { InputText } from "primereact/inputtext";
 
 const Register = () => {
     const location = useLocation();
@@ -42,7 +43,6 @@ const Register = () => {
             }
 
             console.log("Registration successful:", response.data);
-            alert("Registration successful!");
 
             dispatch(
                 saveUser({
@@ -126,7 +126,16 @@ const Register = () => {
     );
 
     return (
-        <div>
+        <div
+            style={{
+                height: "100vh",
+                display: "flex",
+                flexDirection: "column",
+                backgroundImage: "url('https://via.placeholder.com/1920x1080')",
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+            }}
+        >
             <Menubar
                 model={items}
                 start={start}
@@ -136,38 +145,93 @@ const Register = () => {
                     color: "white",
                     borderBottom: "2px solid #005757",
                     height: "100px",
-                    width: "100%",
                 }}
             />
-            <div style={{ padding: "1rem" }}>
-                <h1>Register as {userType === "Renter" ? "Renter" : "User"}</h1>
-                <p>Name: {name}</p>
-                <p>Email: {email}</p>
-                <p>Password: {password}</p>
-
-                <form onSubmit={handleSubmit}>
-                    <div>
-                        <label htmlFor="address">Address:</label>
-                        <input
-                            type="text"
-                            id="address"
-                            value={address}
-                            onChange={(e) => setAddress(e.target.value)}
-                            required
+            <div
+                style={{
+                    flex: 1,
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                }}
+            >
+                <div
+                    style={{
+                        width: "400px",
+                        padding: "2rem",
+                        background: "white",
+                        borderRadius: "8px",
+                        boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+                    }}
+                >
+                    <h1 style={{ textAlign: "center", marginBottom: "1.5rem", color: "#008080" }}>
+                        Register as {userType === "Renter" ? "Renter" : "User"}
+                    </h1>
+                    <form onSubmit={handleSubmit}>
+                    <div style={{ marginTop: "2rem", color: "#008080" }}>
+                       
+                       <p><strong>Name:</strong> {name}</p>
+                       <p><strong>Email:</strong> {email}</p>
+                       <p><strong>Password:</strong> {password}</p>
+                      
+                   </div>
+                        <div className="p-field" style={{ marginBottom: "1.5rem" }}>
+                            <label htmlFor="address" style={{ display: "block", marginBottom: "0.5rem", fontWeight: "bold", color: "#008080" }}>
+                                Address:
+                            </label>
+                            <InputText
+                                id="address"
+                                value={address}
+                                onChange={(e) => setAddress(e.target.value)}
+                                required
+                                className="p-inputtext-lg"
+                                style={{
+                                    width: "100%",
+                                    borderColor: "#008080",
+                                    outline: "none",
+                                    transition: "box-shadow 0.3s ease",
+                                }}
+                                onFocus={(e) => (e.target.style.boxShadow = "0 0 5px #005757")}
+                                onBlur={(e) => (e.target.style.boxShadow = "none")}
+                            />
+                        </div>
+                        <div className="p-field" style={{ marginBottom: "1.5rem" }}>
+                            <label htmlFor="phone" style={{ display: "block", marginBottom: "0.5rem", fontWeight: "bold", color: "#008080" }}>
+                                Phone:
+                            </label>
+                            <InputText
+                                id="phone"
+                                value={phone}
+                                onChange={(e) => setPhone(e.target.value)}
+                                required
+                                className="p-inputtext-lg"
+                                style={{
+                                    width: "100%",
+                                    borderColor: "#008080",
+                                    outline: "none",
+                                    transition: "box-shadow 0.3s ease",
+                                }}
+                                onFocus={(e) => (e.target.style.boxShadow = "0 0 5px #005757")}
+                                onBlur={(e) => (e.target.style.boxShadow = "none")}
+                            />
+                        </div>
+                        <Button
+                            type="submit"
+                            label="Register"
+                            icon="pi pi-user-plus"
+                            iconPos="left"
+                            className="p-button-lg p-button-rounded"
+                            style={{
+                                width: "100%",
+                                backgroundColor: "#008080",
+                                borderColor: "#008080",
+                                color: "white",
+                                fontWeight: "bold",
+                            }}
                         />
-                    </div>
-                    <div>
-                        <label htmlFor="phone">Phone:</label>
-                        <input
-                            type="tel"
-                            id="phone"
-                            value={phone}
-                            onChange={(e) => setPhone(e.target.value)}
-                            required
-                        />
-                    </div>
-                    <button type="submit">Register</button>
-                </form>
+                    </form>
+               
+                </div>
             </div>
         </div>
     );
