@@ -15,6 +15,7 @@ async function createRent(req, res) {
         let user = await User.findById(req.params.userId);
         user.userRent.push(rent._id);
         await user.save();
+ 
 
         res.status(201).send({ rent: rent });
     } catch (error) {
@@ -37,25 +38,31 @@ async function addAccessory(req, res) {
             return res.status(404).send("אביזר לא נמצא.");
         }
         
-        const inputDate = new Date(req.body.rentDate).toISOString();  // המרת התאריך לפורמט ISO
-        
-        // בדוק אם התאריך תפוס
-        const dateExists = accessory.accessoryRent.some(rent => {
-            const rentDate = new Date(rent.date);
-            const rentReturnDate = new Date(rent.returnDate); // הנחה שיש תאריך החזרה
-            return (inputDate >= rentDate && inputDate <= rentReturnDate) && 
-                   rent.renter.toString() === renterId; // בדיקה ישירה מול השוכר
+        const inputDate = new Date(req.body.rentDate); // תאריך ההשכרה
+        const returnDate = new Date(inputDate); // תאריך החזרה
+        returnDate.setDate(inputDate.getDate() + 1); // הוסף יום אחד לתאריך ההשכרה
+
+        // בדוק אם התאריכים תפוסים
+        const isDateOccupied = accessory.accessoryRent.some(rent => {
+            const rentStartDate = new Date(rent.date);
+            const rentEndDate = rent.returnDate ? new Date(rent.returnDate) : rentStartDate;
+
+            // בדוק אם יש חפיפה בין הטווחים
+            return (
+                (inputDate >= rentStartDate && inputDate <= rentEndDate) || // inputDate בתוך הטווח
+                (returnDate >= rentStartDate && returnDate <= rentEndDate) || // returnDate בתוך הטווח
+                (inputDate <= rentStartDate && returnDate >= rentEndDate) // טווח חדש מכסה את הטווח הקיים
+            );
         });
 
-        if (dateExists) {  // אם נמצא תאריך תפוס, הימנע מהוספה
-            return res.status(409).send("תאריך זה כבר תפוס עבור השוכר.");
+        if (isDateOccupied) { // אם נמצא תאריך תפוס, הימנע מהוספה
+            return res.status(409).send("תאריכים אלו כבר תפוסים עבור האביזר.");
         }
         
         let rent = await Rent.findOne({ rentUser: userId, rentDate: req.body.rentDate });
         if (!rent) {
             rent = new Rent(req.body);  
-            rent.rentReturnDate = new Date(rent.rentDate);
-            rent.rentReturnDate.setDate(rent.rentDate.getDate() + 3);   
+            rent.rentReturnDate = returnDate;   
             await rent.save();
             
             let user = await User.findById(req.params.userId);
@@ -69,7 +76,12 @@ async function addAccessory(req, res) {
         await rent.save();
 
         // עדכון היסטוריית השכרת האביזר
-        accessory.accessoryRent.push({ date: req.body.rentDate, renter: renterId });
+       // עדכון היסטוריית השכרת האביזר
+    accessory.accessoryRent.push({ 
+       date: req.body.rentDate, 
+       renter: renterId 
+     });
+await accessory.save();
         await accessory.save();
 
         // מציאת התמונה המתאימה לפי המשכיר
@@ -257,10 +269,10 @@ async function deleteRent(req, res) {
         }
 
         // עדכון טבלת Accessories
-        await Accessory.updateMany(
-            { accessoryRent: { $elemMatch: { rent: rentId } } },
-            { $pull: { accessoryRent: { rent: rentId } } }
-        );
+await Accessory.updateMany(
+    { accessoryRent: { $elemMatch: { renter: rent.rentRenter, date: rent.rentDate } } },
+    { $pull: { accessoryRent: { renter: rent.rentRenter, date: rent.rentDate } } }
+);
 
         // מחק את השכרה
         await Rent.findByIdAndDelete(rentId);
@@ -306,8 +318,15 @@ async function removeAccessory(req, res) {
             return res.status(404).send("השכרה לא נמצאה.");
         }
 
+        // בדוק אם יש אביזרים בהשכרה
+        if (!rent.rentAccessories || rent.rentAccessories.length === 0) {
+            return res.status(404).send("אין אביזרים בהשכרה.");
+        }
+
         // בדוק אם האביזר קיים בהשכרה
-        const accessoryIndex = rent.rentAccessories.indexOf(accessoryId);
+        console.log("Accessory ID:", accessoryId);
+        console.log("Rent Accessories:", rent.rentAccessories);
+        const accessoryIndex = rent.rentAccessories.findIndex(id => id.toString() === accessoryId.toString());
         if (accessoryIndex === -1) {
             return res.status(404).send("אביזר לא נמצא בהשכרה.");
         }
@@ -318,17 +337,21 @@ async function removeAccessory(req, res) {
 
         // עדכון היסטוריית השכרת האביזר
         const accessory = await Accessory.findById(accessoryId);
-        accessory.accessoryRent = accessory.accessoryRent.filter(rent => rent.renter.toString() !== renterId || rent.date !== rentDate);
+        if (!accessory) {
+            return res.status(404).send("אביזר לא נמצא.");
+        }
+
+        accessory.accessoryRent = accessory.accessoryRent.filter(rent => 
+            rent.renter.toString() !== renterId || new Date(rent.date).getTime() !== new Date(rentDate).getTime()
+        );
         await accessory.save();
 
         // בדוק אם אין יותר אביזרים בהשכרה
         if (rent.rentAccessories.length === 0) {
-            // קרא לפונקציה deleteRent כדי למחוק את ההשכרה
             await deleteRent({ params: { rentId: rent._id } }, res);
             return; // עצור כאן כדי למנוע הודעה נוספת
         }
 
-        // אם ההשכרה לא נמחקה, החזר הודעה על מחיקת האביזר
         res.status(200).send("אביזר נמחק בהצלחה מהשכרה.");
     } catch (error) {
         console.error("Error in removeAccessory:", error.message);
@@ -371,6 +394,13 @@ async function checkOrCreateRent(req, res) {
             rentReturnDate: new Date(new Date(rentDate).setDate(new Date(rentDate).getDate() + 1)), // הוסף יום אחד לתאריך השכרה
         });
         await newRent.save();
+
+        accessory.accessoryRent.push({ 
+            date: rentDate, 
+            returnDate: newRent.rentReturnDate, 
+            renter: renterId 
+        });
+        await accessory.save();
         return res.status(201).send({ message: "New rent created" });
     } catch (error) {
         console.error("Error checking or creating rent:", error);

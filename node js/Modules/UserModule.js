@@ -10,7 +10,7 @@ const UserModule = mongoose.Schema({
         match: /^\+?[0-9]{10,15}$/
     },
     userOrders: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Orders' }],
-    userRent:[{ type: mongoose.Schema.Types.ObjectId, ref: 'Rents' }],
+    // userRent:[{ type: mongoose.Schema.Types.ObjectId, ref: 'Rents' }],
 });
 
 

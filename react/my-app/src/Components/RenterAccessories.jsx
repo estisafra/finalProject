@@ -46,25 +46,6 @@ const RenterAccessories = () => {
         setDeletingAccessoryId(accessoryid);
     };
 
-<<<<<<< HEAD
-    // עדכון הרשימה לאחר מחיקה
-    const handleDeleteSuccess = async () => {
-        setDeletingAccessoryId(null); // איפוס ה-ID של האביזר שנמחק
-    
-        // עדכון הרשימה על ידי סינון האביזר שנמחק
-        setAccessories(prevAccessories => 
-            prevAccessories.filter(accessory => accessory.accessoryId !== deletingAccessoryId)
-        );
-    
-        // הצגת הודעת הצלחה
-        toast.current.show({
-            severity: 'success',
-            summary: 'Success',
-            detail: 'Accessory deleted successfully',
-            life: 3000,
-        });
-    };
-=======
     const handleDeleteSuccess = () => {
         setAccessories((prevAccessories) =>
             prevAccessories.filter((accessory) => accessory.accessoryId !== deletingAccessoryId)
@@ -152,7 +133,6 @@ const RenterAccessories = () => {
         </div>
     );
 
->>>>>>> userComponents
     return (
         <div>
             <Toast ref={toast} />
