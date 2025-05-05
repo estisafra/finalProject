@@ -2,7 +2,6 @@ const express = require("express")
 const router = express.Router()
 const { deleteRent,createRent,addAccessory,getAllRents,updateRent,removeAccessory,getRentsByRenter,checkOrCreateRent,getRentsByUser, getOldRentsByRenter,getOldRentsByUser} = require("../Controllers/RentController")
 const {  verifyToken } = require("../Middleware/authenticataion");
-
 router.post("/createRent/userId",createRent)
 router.delete("/deleteRent/:rentId",verifyToken,deleteRent)
 router.get("/getAllRents",verifyToken,getAllRents)
