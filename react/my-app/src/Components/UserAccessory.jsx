@@ -4,8 +4,12 @@ import { useSelector } from "react-redux";
 import { Menubar } from "primereact/menubar";
 import { Button } from "primereact/button";
 import axios from "axios";
+import { useLocation } from "react-router-dom";
 
-const UserAccessory = () => {
+const UserAccessory = () => { 
+    const location = useLocation();
+    const { renterId } = location.state || {}; // קבלת renterId מ-location.state
+    console.log("Renter ID:", renterId); // הדפסת ה-renterId לקונסול
     const navigate = useNavigate();
     const userName = useSelector((state) => state.user.name); // שם המשתמש
     const [showProfileMenu, setShowProfileMenu] = useState(false); // שליטה על תפריט הפרופיל
@@ -14,22 +18,49 @@ const UserAccessory = () => {
     // קריאת fetch לנתיב /Accessory/getAllAccessory עם token
     useEffect(() => {
         const fetchAccessories = async () => {
-            const token = localStorage.getItem("token"); // קבלת ה-token מ-localStorage
+            const token = localStorage.getItem("token"); 
+            console.log("Token:", token); // הדפסת ה-token לקונסול
+            if (!token) {
+                console.error("No token found. Redirecting to login.");
+                navigate("/login");
+                return;
+            }
+
             try {
-                const response = await axios.get("http://localhost:8080/Accessory/getAllAccessory", {
+                const endpoint = `http://localhost:8080/Accessory/getAllAccessory`;
+
+                const response = await axios.get(endpoint, {
                     headers: {
-                        Authorization: `Bearer ${token}`, // הוספת ה-token ל-headers
+                        Authorization: `Bearer ${token}`,
                     },
                 });
+
                 console.log("Accessories fetched:", response.data);
-                setAccessories(response.data); // שמירת האביזרים ב-state
+
+                if (renterId) {
+                    const filteredAccessories = response.data
+                        .map(accessory => {
+                            const matchingRenter = accessory.accessoryRenter.find(renter => renter.renter === renterId);
+                            if (matchingRenter) {
+                                return {
+                                    ...accessory,
+                                    accessoryRenter: [matchingRenter], // שמירת רק המשכיר המתאים
+                                };
+                            }
+                            return null;
+                        })
+                        .filter(accessory => accessory !== null); // סינון אביזרים ללא משכיר מתאים
+                    setAccessories(filteredAccessories); // שמירת האביזרים המסוננים ב-state
+                } else {
+                    setAccessories(response.data); // שמירת כל האביזרים ב-state
+                }
             } catch (error) {
                 console.error("Error fetching accessories:", error);
             }
         };
 
         fetchAccessories();
-    }, []);
+    }, [renterId]);
 
     const fixImagePath = (path) => {
         if (!path) return "";
@@ -46,7 +77,7 @@ const UserAccessory = () => {
         {
             label: "Orders",
             icon: "pi pi-file",
-            command: () => navigate("/orders"),
+            command: () => navigate("/userOrders"),
         },
         {
             label: "Home",
@@ -56,7 +87,7 @@ const UserAccessory = () => {
         {
             label: "Rents",
             icon: "pi pi-shopping-cart",
-            command: () => navigate("/rents"),
+            command: () => navigate("/userRents"),
         },
     ];
 
@@ -127,10 +158,10 @@ const UserAccessory = () => {
                 backgroundPosition: "center",
                 display: "flex",
                 flexDirection: "column",
-                color: "white", // צבע טקסט לבן כדי להתאים לרקע
+                color: "black", // צבע טקסט לבן כדי להתאים לרקע
             }}
         >
-            <Menubar
+           <Menubar
                 model={items}
                 start={start}
                 end={end}
@@ -169,6 +200,10 @@ const UserAccessory = () => {
                                     alt={`${accessory.accessoryName} - Renter ${index + 1}`}
                                     style={{ width: "100%", height: "150px", objectFit: "cover", borderRadius: "8px" }}
                                 />
+<<<<<<< HEAD
+=======
+
+>>>>>>> 1ec8672908b745c0bb6a68f9582add5242258011
                           <Button
     icon="pi pi-shopping-cart"
     className="p-button-rounded p-button-success"
@@ -185,6 +220,11 @@ const UserAccessory = () => {
         })
     }
 />
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> 1ec8672908b745c0bb6a68f9582add5242258011
                             </div>
                         ))
                     )}

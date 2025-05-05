@@ -20,7 +20,7 @@ const UserHome = () => {
         {
             label: "Orders",
             icon: "pi pi-file",
-            command: () => navigate("/orders"),
+            command: () => navigate("/userOrders"),
         },
         {
             label: "Accessories",
@@ -30,7 +30,7 @@ const UserHome = () => {
         {
             label: "Rents",
             icon: "pi pi-shopping-cart",
-            command: () => navigate("/rents"),
+            command: () => navigate("/userRents"),
         },
     ];
 

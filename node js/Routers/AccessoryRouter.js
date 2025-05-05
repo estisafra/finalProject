@@ -2,7 +2,6 @@ const express = require("express")
 const router = express.Router()
 const { createAccessory,deleteAccessory,getAccessoryByGallery,getAccessoryByRenter,updateAccessory,deleteAccessoryFromRenter,getAccessoryRentersDetails,getAllAccessory,getOccupiedDates } = require("../Controllers/AccessoryController")
 const { verifyToken } = require("../Middleware/authenticataion");
-
 router.post("/createAccessory",createAccessory)
 router.delete("/deleteAccessory/:id",verifyToken,deleteAccessory)
 router.get("/getAllAccessory",verifyToken,getAllAccessory)
