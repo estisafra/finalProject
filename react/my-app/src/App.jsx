@@ -41,8 +41,9 @@ function App() {
         <Route path="/userOrders" element={<UserOrders/>}/>
         <Route path="/register" element={<Register />} />
       </Routes>
+      <SendEmails/>
     </Suspense>
-  
+
   );
 }
 

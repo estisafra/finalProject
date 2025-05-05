@@ -4,6 +4,10 @@ import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { Menubar } from "primereact/menubar";
 import { Button } from "primereact/button";
+import { DataTable } from 'primereact/datatable';
+import { Column } from 'primereact/column';
+import { TabView, TabPanel } from 'primereact/tabview';
+import React from "react";
 
 const RenterRents = () => {
     const [rents, setRents] = useState([]);
@@ -145,7 +149,108 @@ const RenterRents = () => {
             <div style={{ padding: "1rem" }}>
                 <h1>Renter Rents</h1>
 
-                {/* כפתורים להחלפת תצוגה */}
+
+                <TabView activeIndex={viewType === "current" ? 0 : 1} onTabChange={(e) => setViewType(e.index === 0 ? "current" : "old")}>
+                    <TabPanel header="Active Rents" leftIcon="pi pi-clock">
+                        <DataTable value={rents} tableStyle={{ minWidth: '60rem' }}>
+                        <Column field="_id" header="Rent ID" sortable></Column>
+                            <Column field="rentUser.userName" header="User Name" sortable></Column>
+                            <Column field="rentDate" header="Rent Date" sortable body={(rowData) => new Date(rowData.rentDate).toLocaleDateString()}></Column>
+                            <Column  header="Rent Status"
+                              body={(rowData) => (
+                                <span
+                                    style={{
+                                        backgroundColor: rowData.status === true ? "#a8e6a3" : rowData.status === false ? "#ffe8a1" : "#f5a6a6",
+                                        color: "black",
+                                        fontWeight: "bold",
+                                        padding: "5px 10px",
+                                        borderRadius: "20px",
+                                        display: "inline-block",
+                                    }}
+                                >
+                                    {rowData.status != null ? (rowData.status ? "Approved" : "Pending") : "Unknown"}
+                                </span>
+                            )}
+                            sortable></Column>
+                            <Column
+                                header="Accessories"
+                               body={(rowData) => (
+                                    <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+                                        {rowData.rentAccessories?.map((accessory, index) => (
+                                            <div key={index} style={{ position: "relative" }}>
+                                                <img
+                                                    src={accessory.matchedImage ? `http://localhost:8080/${accessory.matchedImage}` : "https://via.placeholder.com/80"}
+                                                    alt="Accessory"
+                                                    style={{ width: "70px", height: "70px", objectFit: "cover", borderRadius: "8px", cursor: "pointer" }}
+                                                />
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            ></Column>
+                         </DataTable> 
+                    </TabPanel>  
+                    <TabPanel header="Old Rents" leftIcon="pi pi-clock">
+                        <DataTable value={rents} tableStyle={{ minWidth: '60rem' }}>  
+                        <Column field="_id" header="Rent ID" sortable></Column>                       
+                            <Column field="rentDate" header="Rent Date" sortable body={(rowData) => new Date(rowData.rentDate).toLocaleDateString()}></Column>
+                            <Column field="rentUser.userName" header="User Name" sortable></Column>
+                            <Column  header="Rent Status"
+                              body={(rowData) => (
+                                <button
+                                style={{
+                                    backgroundColor: rowData.status === true ? "#a8e6a3" : rowData.status === false ? "#ffe8a1" : "#f5a6a6",
+                                    color: "black",
+                                    fontWeight: "bold",
+                                    padding: "5px 10px",
+                                    borderRadius: "20px",
+                                    border: "none", // לבטל את הגבול
+                                    cursor: "pointer", // לשנות את הסמן לכף יד
+                                    display: "inline-block", // לשמור על תצוגה inline
+                                    outline: "none" // לבטל את הקו החיצוני
+                                }}
+                                onClick={() => handleUpdateStatus(rowData._id)}>
+                           
+                                <span
+                                    style={{
+                                        backgroundColor: rowData.status === true ? "#a8e6a3" : rowData.status === false ? "#ffe8a1" : "#f5a6a6",
+                                        color: "black",
+                                        fontWeight: "bold",
+                                        padding: "5px 10px",
+                                        borderRadius: "20px",
+                                        display: "inline-block",
+                                    }}
+                                >
+                                    {rowData.status != null ? (rowData.status ? "Approved" : "Pending") : "Unknown"}
+                                </span></button>
+                                
+                            )}
+                            sortable></Column>
+                              <Column
+                                header="Accessories"
+                               body={(rowData) => (
+                                    <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+                                        {rowData.rentAccessories?.map((accessory, index) => (
+                                            <div key={index} style={{ position: "relative" }}>
+                                                <img
+                                                    src={accessory.matchedImage ? `http://localhost:8080/${accessory.matchedImage}` : "https://via.placeholder.com/80"}
+                                                    alt="Accessory"
+                                                    style={{ width: "70px", height: "70px", objectFit: "cover", borderRadius: "8px", cursor: "pointer" }}
+                                                />
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            ></Column>
+                         </DataTable> 
+                    </TabPanel>  
+                </TabView>     
+
+
+
+
+
+                {/* כפתורים להחלפת תצוגה
                 <div style={{ marginBottom: "1rem" }}>
                     <Button
                         label="השכרות פעילות"
@@ -158,42 +263,9 @@ const RenterRents = () => {
                         onClick={() => setViewType("old")}
                         className={`p-button-sm ${viewType === "old" ? "" : "p-button-outlined"}`}
                     />
-                </div>
+                </div> */}
 
-                <ul>
-                    {rents.map((rent, index) => (
-                        <li key={index} style={{ marginBottom: '1rem' }}>
-                            Rent User: {rent.rentUser?.userName || "Unknown User"} <br />
-                            Rent Date: {rent.rentDate ? new Date(rent.rentDate).toLocaleDateString() : "Unknown Date"} <br />
-                            Rent Accessories:{" "}
-                            {Array.isArray(rent.rentAccessories) ? (
-                                rent.rentAccessories.map((accessory, idx) => (
-                                    <span key={idx} style={{ marginLeft: "10px" }}>
-                                        {accessory.accessoryName || "Unknown Accessory"}
-                                    </span>
-                                ))
-                            ) : (
-                                "No Accessories"
-                            )}
-                            {/* כפתור עדכון סטטוס - רק אם viewType === old */}
-                            {viewType === "old" && !rent.status && (
-                                <div style={{ marginTop: "10px" }}>
-                                    <Button
-                                        label="עדכן סטטוס ל-TRUE"
-                                        icon="pi pi-check"
-                                        className="p-button-success p-button-sm"
-                                        onClick={() => handleUpdateStatus(rent._id)}
-                                    />
-                                </div>
-                            )}
-                            {viewType === "old" && rent.status && (
-                                <div style={{ marginTop: "10px", color: "green", fontWeight: "bold" }}>
-                                    סטטוס: עודכן
-                                </div>
-                            )}
-                        </li>
-                    ))}
-                </ul>
+              
             </div>
         </div>
     );

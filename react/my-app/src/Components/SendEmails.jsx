@@ -21,13 +21,26 @@ const SendEmails = () => {
         }
     };
 
+    const scheduleSendEmails = (targetHour, targetMinute) => {
+        const now = new Date();
+        const targetTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), targetHour, targetMinute, 0, 0);
+
+        if (targetTime < now) {
+            targetTime.setDate(targetTime.getDate() + 1);
+        }
+
+        const timeUntilTarget = targetTime - now;
+
+        setTimeout(callSendEmails, timeUntilTarget);
+    };
+
     useEffect(() => {
-        callSendEmails();
+        scheduleSendEmails(0, 0); 
     }, []);
 
-    return(
-        <>sendemails</>
-    )
+    return (
+        <></>
+    );
 };
 
 export default SendEmails;

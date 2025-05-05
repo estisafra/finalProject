@@ -212,7 +212,7 @@ const UserRents = () => {
                     <TabPanel header="Active Rents" leftIcon="pi pi-clock">
                         <DataTable value={rents} tableStyle={{ minWidth: '60rem' }}>
                             <Column
-                                header="Images"
+                                header="Accessories"
                                 body={(rowData) => (
                                     <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
                                         {rowData.rentAccessories?.map((accessory, index) => (

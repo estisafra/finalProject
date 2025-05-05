@@ -200,10 +200,6 @@ const UserAccessory = () => {
                                     alt={`${accessory.accessoryName} - Renter ${index + 1}`}
                                     style={{ width: "100%", height: "150px", objectFit: "cover", borderRadius: "8px" }}
                                 />
-<<<<<<< HEAD
-=======
-
->>>>>>> 1ec8672908b745c0bb6a68f9582add5242258011
                           <Button
     icon="pi pi-shopping-cart"
     className="p-button-rounded p-button-success"
@@ -220,11 +216,8 @@ const UserAccessory = () => {
         })
     }
 />
-<<<<<<< HEAD
-=======
 
 
->>>>>>> 1ec8672908b745c0bb6a68f9582add5242258011
                             </div>
                         ))
                     )}

@@ -124,12 +124,31 @@ async function getRentsByRenter(req, res) {
         .populate('rentAccessories')
         .populate('rentRenter');
 
-        res.status(200).send({ rents });
+        // סינון תמונות לפי המשכיר של ההשכרה
+        const enrichedRents = rents.map(rent => {
+            const accessoriesWithImage = rent.rentAccessories.map(accessory => {
+                const matching = accessory.accessoryRenter.find(ar => 
+                    ar.renter && ar.renter._id.toString() === renterId.toString()
+                );
+                return {
+                    ...accessory.toObject(),
+                    matchedImage: matching?.image || null
+                };
+            });
+
+            return {
+                ...rent.toObject(),
+                rentAccessories: accessoriesWithImage
+            };
+        });
+
+        res.status(200).send({ rents: enrichedRents });
     } catch (error) {
         console.error(error); 
         res.status(400).send(error.message);
     }
 }
+
 async function getOldRentsByRenter(req, res) {
     const { renterId } = req.params; 
     try {
@@ -142,12 +161,31 @@ async function getOldRentsByRenter(req, res) {
         .populate('rentAccessories')
         .populate('rentRenter');
 
-        res.status(200).send({ rents });
+        // סינון תמונות לפי המשכיר של ההשכרה
+        const enrichedRents = rents.map(rent => {
+            const accessoriesWithImage = rent.rentAccessories.map(accessory => {
+                const matching = accessory.accessoryRenter.find(ar => 
+                    ar.renter && ar.renter._id.toString() === renterId.toString()
+                );
+                return {
+                    ...accessory.toObject(),
+                    matchedImage: matching?.image || null
+                };
+            });
+
+            return {
+                ...rent.toObject(),
+                rentAccessories: accessoriesWithImage
+            };
+        });
+
+        res.status(200).send({ rents: enrichedRents });
     } catch (error) {
         console.error(error); 
         res.status(400).send(error.message);
     }
 }
+
 
 async function getRentsByUser(req, res) {
     const { userId } = req.params;
