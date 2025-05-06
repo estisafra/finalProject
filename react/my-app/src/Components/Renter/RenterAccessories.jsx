@@ -5,14 +5,16 @@ import { useNavigate } from "react-router-dom";
 import { Menubar } from "primereact/menubar";
 import { Toast } from "primereact/toast";
 import { Button } from "primereact/button";
+import { Dialog } from "primereact/dialog";
 import DeleteAccessory from "./DeleteAccessory";
-
+import AddAccessory from "./AddAccessory"; // ייבוא דיאלוג הוספת האביזר
 
 const RenterAccessories = () => {
     const [accessories, setAccessories] = useState([]);
     const [showAddAccessory, setShowAddAccessory] = useState(false);
     const [deletingAccessoryId, setDeletingAccessoryId] = useState(null);
     const [showProfileMenu, setShowProfileMenu] = useState(false);
+    const [isAccessoryAdded, setIsAccessoryAdded] = useState(false);
     const id = useSelector((state) => state.user.id);
     const userName = useSelector((state) => state.user.name);
     const toast = useRef(null);
@@ -34,13 +36,15 @@ const RenterAccessories = () => {
                 }
             }
         };
-
+    
         fetchAccessories();
-    }, [id]);
+    }, [id, isAccessoryAdded]);
 
-    if (showAddAccessory) {
-        navigate("/addAccessory");
-    }
+    const handleAddAccessory = (newAccessory) => {
+        setAccessories((prevAccessories) => [...prevAccessories, newAccessory]);
+        setShowAddAccessory(false);
+        setIsAccessoryAdded((prev) => !prev); // עדכן את ה-state כדי להפעיל את useEffect
+    };
 
     const handleDelete = (accessoryid) => {
         setDeletingAccessoryId(accessoryid);
@@ -134,72 +138,76 @@ const RenterAccessories = () => {
     );
 
     return (
-        <div>
-            <Toast ref={toast} />
-            <Menubar
-                model={items}
-                start={start}
-                end={end}
-                style={{
-                    backgroundColor: "#008080",
-                    color: "white",
-                    borderBottom: "2px solid #005757",
-                    height: "100px",
-                    width: "100%",
-                }}
-            />
-            <div style={{ padding: "1rem" }}>
-                <button onClick={() => setShowAddAccessory(true)}>To add accessory</button>
-                <h1>Renter Accessories</h1>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: "1rem", justifyContent: "center" }}>
-                    {accessories.map((accessory) => (
-                        <div
-                            key={accessory.accessoryId || accessory.accessoryName}
+    <div>
+        <Toast ref={toast} />
+        <Menubar
+            model={items}
+            start={start}
+            end={end}
+            style={{
+                backgroundColor: "#008080",
+                color: "white",
+                borderBottom: "2px solid #005757",
+                height: "100px",
+                width: "100%",
+            }}
+        />
+        <div style={{ padding: "1rem" }}>
+            <Button label="To add accessory" icon="pi pi-plus" onClick={() => setShowAddAccessory(true)} />
+            <h1>Renter Accessories</h1>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "1rem", justifyContent: "center" }}>
+                {accessories.map((accessory) => (
+                    <div
+                        key={accessory.accessoryId || accessory.accessoryName}
+                        style={{
+                            border: "1px solid #ccc",
+                            borderRadius: "8px",
+                            padding: "1rem",
+                            width: "250px",
+                            textAlign: "center",
+                            boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+                            backgroundColor: "white",
+                            position: "relative",
+                        }}
+                    >
+                        <h3>{accessory.accessoryName}</h3>
+                        <p>
+                            <strong>Price:</strong> {accessory.price || "N/A"}
+                        </p>
+                        <img
+                            src={`http://localhost:8080${accessory.image}`}
+                            alt={accessory.accessoryName}
+                            style={{ width: "100%", height: "150px", objectFit: "cover", borderRadius: "8px" }}
+                        />
+                        <Button
+                            icon="pi pi-trash"
+                            className="p-button-rounded p-button-danger"
                             style={{
-                                border: "1px solid #ccc",
-                                borderRadius: "8px",
-                                padding: "1rem",
-                                width: "250px",
-                                textAlign: "center",
-                                boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-                                backgroundColor: "white",
-                                position: "relative",
+                                position: "absolute",
+                                bottom: "10px",
+                                right: "10px",
                             }}
-                        >
-                            <h3>{accessory.accessoryName}</h3>
-                            <p>
-                                <strong>Price:</strong> {accessory.price || "N/A"}
-                            </p>
-                            <img
-                                src={`http://localhost:8080${accessory.image}`}
-                                alt={accessory.accessoryName}
-                                style={{ width: "100%", height: "150px", objectFit: "cover", borderRadius: "8px" }}
-                            />
-                            <Button
-                                icon="pi pi-trash"
-                                className="p-button-rounded p-button-danger"
-                                style={{
-                                    position: "absolute",
-                                    bottom: "10px",
-                                    right: "10px",
-                                }}
-                                onClick={() => handleDelete(accessory.accessoryId)}
-                            />
-                        </div>
-                    ))}
-                </div>
+                            onClick={() => handleDelete(accessory.accessoryId)}
+                        />
+                    </div>
+                ))}
             </div>
-
-            {deletingAccessoryId && (
-                <DeleteAccessory
-                    accessoryid={deletingAccessoryId}
-                    onSuccess={handleDeleteSuccess}
-                    onClose={() => setDeletingAccessoryId(null)}
-                    onMessage={handleMessage}
-                />
-            )}
         </div>
-    );
+
+        <Dialog header="Add Accessory" visible={showAddAccessory} onHide={() => setShowAddAccessory(false)}>
+             <AddAccessory onClose={handleAddAccessory} />
+       </Dialog>
+
+        {deletingAccessoryId && (
+            <DeleteAccessory
+                accessoryid={deletingAccessoryId}
+                onSuccess={handleDeleteSuccess}
+                onClose={() => setDeletingAccessoryId(null)}
+                onMessage={handleMessage}
+            />
+        )}
+    </div>
+);
 };
 
 export default RenterAccessories;

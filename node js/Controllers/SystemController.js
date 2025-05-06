@@ -19,10 +19,10 @@ async function sendEmails() {
             rentReturnDate: { $gte: tomorrow, $lt: dayAfterTomorrow }
         }).populate("rentUser");
 
-        // const recipients = rents
-        //     .map(rent => rent.rentUser?.userMail)
-        //     .filter(email => email);
-        const recipients=["s0504172669@gmail.com"]
+        const recipients = rents
+            .map(rent => rent.rentUser?.userMail)
+            .filter(email => email);
+        // const recipients=["s0504172669@gmail.com"]
 
         if (recipients.length === 0) {
             console.log("No recipients found.");

@@ -86,7 +86,7 @@ async function addAccessory(req, res) {
 
         await renterDoc.save();
         await accessory.save();
-
+        console.log("Accessory added successfully:", accessory);
         res.status(200).send({ message: "Accessory added successfully", accessory });
     } catch (error) {
         console.error("Error adding accessory:", error);
