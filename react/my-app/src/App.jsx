@@ -11,7 +11,7 @@ const Login = lazy(() => import("./Components/Login"));
 const RegisterPhotography = lazy(() => import("./Components/RegisterPhotography"));
 const RenterHome = lazy(() => import("./Components/Renter/RenterHome"));
 const UserHome = lazy(() => import("./Components/User/UserHome"));
-const PhotographyHome = lazy(() => import("./Components/PhotographyHome"));
+const PhotographyHome = lazy(() => import("./Components/Photography/PhotographyHome"));
 const RenterAccessories = lazy(() => import("./Components/Renter/RenterAccessories"));
 const RenterRents = lazy(() => import("./Components/Renter/RenterRents"));
 const AddAccessory = lazy(() => import("./Components/Renter/AddAccessory"));
