@@ -14,17 +14,13 @@ const PhotographyModule = mongoose.Schema({
         match: /^\+?[0-9]{10,15}$/ 
     },
     photographyRank: { type: Number, min: 0, max: 10 },
-    photographyImages: [{
-        url: { type: String, required: true }, 
-        galery: { type: String, required: true } 
-    }],
     photographyGaleries: [{
         name: { type: String, required: true },
         minPrice: { type: Number, required: true },
-        maxPrice: { type: Number, required: true }
+        maxPrice: { type: Number, required: true },
+       images:[{type: String, required: true}]
     }],
     photographyOrders: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Orders' }],
-    
     photographyResponse: [{ type: String }], 
     photographyLink: {
         type: String,

@@ -6,6 +6,7 @@ const { sendEmails } = require("../Controllers/SystemController");
 const { login, register } = require("../Middleware/authenticataion");
 router.post("/sendEmails", sendEmails);
 router.post("/login", login); 
-router.post("/register",upload.any(), register); 
+router.post("/register", upload.array('images'), register); 
+
 
 module.exports = router;

@@ -6,23 +6,19 @@ const Orders = require("../Modules/OrderModule");
 const bcrypt = require("bcryptjs");
 
 
-const createPhotography = async (req, res) => {
-    
- 
+const createPhotography = async (req) => {
     try {
-
+        console.log(req.body);
         const newPhotography = new Photography(req.body);
-
-        const hashedPassword = await bcrypt.hash(photography.photographyPassword, 10);
-        photography.photographyPassword = hashedPassword;
+        const hashedPassword = await bcrypt.hash(newPhotography.photographyPassword, 10);
+        newPhotography.photographyPassword = hashedPassword;
         await newPhotography.save();
-
-        return photography;
-            } catch (error) {
-                // החזרת שגיאה אם יש בעיה
-                throw new Error(error.message);
-            }
+        return newPhotography; // החזרת האובייקט שנשמר
+    } catch (error) {
+        throw new Error(error.message); // זריקת שגיאה
+    }
 };
+
 
 const getAllPhotography = async (req, res) => {
     try {

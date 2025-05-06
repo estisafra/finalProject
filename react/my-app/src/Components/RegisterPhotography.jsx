@@ -14,30 +14,43 @@ const RegisterPhotography = () => {
     const [address, setAddress] = useState("");
     const [phone, setPhone] = useState("");
     const [photographyLink, setPhotographyLink] = useState("");
-    const [photographyGaleries, setPhotographyGaleries] = useState([{ name: 'new born', minPrice: 0, maxPrice: 0 }]);
-    const [Images, setImages] = useState([]); // מערך התמונות עם שם גלריה
-    const [allImages, setAllImages] = useState([]); // מערך הקבצים עצמ
+    const [photographyGaleries, setPhotographyGaleries] = useState([{ name: 'new born', minPrice: 0, maxPrice: 0,images: [] }]); // מערך הגלריות עם שם, מחיר מינימלי ומחיר מקסימלי
+    const [images, setImages] = useState([]);
     const [selectedGalleryIndex, setSelectedGalleryIndex] = useState(0);
 
-    // הוספת תמונות למערך Images עם שם הגלריה הנוכחית ולמערך allImages
-    const handleImageChange = (e) => {
-        const files = Array.from(e.target.files);
 
-        // יצירת אובייקטים עם שם גלריה
-        const newImages = files.map((file) => ({
-            url: file, // שמירת הקובץ עצמו
-            gallery: photographyGaleries[selectedGalleryIndex].name, // שם הגלריה הנוכחית
+    const handleAddGallery = () => {
+        const newGalleryName = `Gallery ${photographyGaleries.length + 1}`;
+
+        // הוספת גלריה חדשה למערך photographyGaleries
+        setPhotographyGaleries((prev) => [
+            ...prev,
+            { name: newGalleryName, minPrice: 0, maxPrice: 0, images: [] },
+        ]);
+
+        // עדכון שם הגלריה לכל התמונות שאין להן שם גלריה
+       
+    };
+    const handleImageChange = (event) => {
+        const files = Array.from(event.target.files);
+        setImages(prev => [...prev, ...files]);
+
+        const galleryImages = files.map(file => ({
+            link: URL.createObjectURL(file)
         }));
 
-        // עדכון מערך התמונות עם שם גלריה
-        setImages((prevImages) => [...prevImages, ...newImages]);
-
-        // עדכון מערך allImages עם הקבצים עצמם בלבד
-        setAllImages((prevAllImages) => [...prevAllImages, ...files]);
+        setPhotographyGaleries(prev => {
+            const updated = [...prev];
+            updated[selectedGalleryIndex].images = [
+                ...updated[selectedGalleryIndex].images,
+                ...galleryImages
+            ];
+            return updated;
+        });
     };
 
-    // עדכון מחירים בגלריה נבחרת
-    const handlePriceChange = (e, field) => {
+     // עדכון מחירים בגלריה נבחרת
+     const handlePriceChange = (e, field) => {
         const value = e.target.value;
         setPhotographyGaleries((prevGaleries) =>
             prevGaleries.map((gallery, index) =>
@@ -47,91 +60,49 @@ const RegisterPhotography = () => {
             )
         );
     };
-
-    // הוספת גלריה חדשה
-    const handleAddGallery = () => {
-        const newGalleryName = `Gallery ${photographyGaleries.length + 1}`;
-
-        // הוספת גלריה חדשה למערך photographyGaleries
-        setPhotographyGaleries((prev) => [
-            ...prev,
-            { name: newGalleryName, minPrice: 0, maxPrice: 0 },
-        ]);
-
-        // עדכון שם הגלריה לכל התמונות שאין להן שם גלריה
-        setImages((prevImages) =>
-            prevImages.map((image) =>
-                image.gallery === "" ? { ...image, gallery: newGalleryName } : image
-            )
-        );
-    };
-
     const handleSubmit = async (e) => {
         e.preventDefault();
-    
         const formData = new FormData();
-        formData.append("photographyPassword", password);
-        formData.append("photographyName", name);
-        formData.append("photographyMail", email);
+
+        formData.append("password", password);
+        formData.append("name", name);
+        formData.append("email", email);
         formData.append("photographyAddress", address);
         formData.append("photographyPhone", phone);
         formData.append("photographyLink", photographyLink);
-    
-        // הוספת כל הגלריות ל-FormData
-        photographyGaleries.forEach((gallery, index) => {
-            formData.append(`galeries[${index}][name]`, gallery.name);
-            formData.append(`galeries[${index}][minPrice]`, gallery.minPrice);
-            formData.append(`galeries[${index}][maxPrice]`, gallery.maxPrice);
+        formData.append("userType", "Photography");
+
+        formData.append("metadata", JSON.stringify(photographyGaleries));
+
+        images.forEach((file) => {
+            formData.append("images", file);
         });
-    
-        // הוספת מערך photographyImages ל-FormData
-        Images.forEach((image, index) => {
-            formData.append(`images[${index}][url]`, image.url); // הקובץ עצמו
-            formData.append(`images[${index}][galery]`, image.gallery); // שם הגלריה
-        });
-    
-        // הוספת כל הקבצים עצמם ממערך allImages ל-FormData
-        allImages.forEach((file) => {
-            formData.append("allImages", file); // הקבצים עצמם להעלאה
-        });
-    
-        console.log("FormData content:");
-        for (let [key, value] of formData.entries()) {
-            console.log(`${key}:`, value);
-        }
-    
+
         try {
             const response = await axios.post("http://localhost:8080/System/register", formData, {
                 headers: {
                     "Content-Type": "multipart/form-data",
                 },
             });
-    
-            console.log("Registration successful:", response.data);
-            alert("Registration successful!");
-    
+
             dispatch(
                 saveUser({
-                    name: name,
+                    name: response.data.user.photographyName,
                     id: response.data.user._id,
-                    role: "Potography",
-                    phone: response.data.user.phone,
-                    address: response.data.user.address,
-                    image: response.data.user.image,
+                    role: "Photography",
+                    phone: response.data.user.photographyPhone,
+                    address: response.data.user.photographyAddress,
+                    email: response.data.user.photographyMail,
                 })
             );
-    
+
             navigate("/photographyHome");
         } catch (error) {
             console.error("Error during registration:", error);
-            if (error.response) {
-                console.error("Server response:", error.response.data);
-                alert(`Registration failed: ${error.response.data.message || "Unknown error"}`);
-            } else {
-                alert("Registration failed. Please try again.");
-            }
+            alert("Registration failed.");
         }
     };
+
 
     return (
         <div>

@@ -89,84 +89,90 @@ async function register(req, res) {
     try {
         const { email, password, userType } = req.body;
 
-        // לוגים לבדיקה
-        console.log("Received data:", req.body); // בדוק את הנתונים שהתקבלו
         if (!email || !password || !userType) {
-            console.error("Missing required fields:", { email, password, userType });
             return res.status(400).send("שדות חובה חסרים.");
         }
 
         let user;
 
-        // יצירת המשתמש לפי סוג המשתמש
         switch (userType) {
             case "User":
-                console.log("Creating User...");
                 req.body.userPassword = password;
                 req.body.userMail = email;
-                req.body.userName=req.body.name;
-                req.body.userPhone=req.body.phone;
-                req.body.userAddress=req.body.address;
+                req.body.userName = req.body.name;
+                req.body.userPhone = req.body.phone;
+                req.body.userAddress = req.body.address;
                 user = await createUser(req, res);
                 break;
-                case "Photography":
-                    const images = req.files.map((file) => ({
-                        url: `/uploads/${file.filename}`,
-                        gallery: req.body.galeries.find((gallery) => gallery.name === file.gallery)?.name || "Unknown",
-                    }))
-                    console.log("Creating Photography...");
-                    req.body.photographyPassword = password;
-                    req.body.photographyMail = email;
-                    req.body.photographyName = req.body.name;
-                    req.body.photographyPhone = req.body.phone;
-                    req.body.photographyAddress = req.body.address;
-                    
-                    // הוספת השדות החדשים
-                    req.body.photographyLink = req.body.link;
-                    req.body.photographyImages = req.body.images; // מערך של תמונות
-                    req.body.photographyGaleries = req.body.galeries; // מערך של גלריות
-                    req.body.photographyResponse = req.body.response; // מערך של תגובות
-                
-                    user = await createPhotography(req, res);
-                    break;
-                
+
             case "Renter":
-                console.log("Creating Renter...");
                 req.body.renterPassword = password;
                 req.body.renterMail = email;
-                req.body.renterName=req.body.name;
-                req.body.renterPhone=req.body.phone;
-                req.body.renterAddress=req.body.address;
+                req.body.renterName = req.body.name;
+                req.body.renterPhone = req.body.phone;
+                req.body.renterAddress = req.body.address;
                 user = await createRenter(req, res);
                 break;
+
+            case "Photography":
+                req.body.photographyPassword = password;
+                req.body.photographyMail = email;
+                req.body.photographyName = req.body.name;
+                req.body.photographyPhone = req.body.photographyPhone;
+                req.body.photographyAddress = req.body.photographyAddress;
+                req.body.photographyLink = req.body.photographyLink;
+
+                // טען את הגלריות מהמחרוזת JSON שנשלחה מהקליינט
+                const parsedGaleries = JSON.parse(req.body.metadata || "[]");
+
+                // צור קישורים לקבצים שהועלו
+                const imageLinks = (req.files || []).map(file => `/uploads/${file.filename}`);
+
+                // תעדכן את כל הגלריות עם קישורים לתמונות לפי הסדר
+                let imgIndex = 0;
+                const galeriesWithImages = parsedGaleries.map(gallery => {
+                    const updatedImages = gallery.images.map(() => {
+                        const link = imageLinks[imgIndex];
+                        imgIndex++;
+                        return link;
+                    });
+
+                    return {
+                        name: gallery.name,
+                        minPrice: gallery.minPrice,
+                        maxPrice: gallery.maxPrice,
+                        images: updatedImages
+                    };
+                });
+
+                // שיבוץ בגלריות
+                req.body.photographyGaleries = galeriesWithImages;
+                req.body.photographyResponse = []; // ריק בשלב זה
+
+                user = await createPhotography(req, res);
+                break;
+
             default:
-                console.error("Invalid userType:", userType);
                 return res.status(400).send("סוג משתמש לא תקין.");
         }
 
-        // אם אחת הפונקציות כבר שלחה תגובה, עצור כאן
         if (!user) {
-            console.error("User creation failed.");
             return res.status(500).send("שגיאה ביצירת המשתמש.");
         }
 
-        console.log("User created successfully:", user);
-
-        // יצירת JWT Token
         const token = jwt.sign(
             { userId: user._id, userType },
             process.env.JWT_SECRET,
             { expiresIn: "99h" }
         );
 
-        console.log("JWT Token created:", token);
-
-        res.status(201).send({ message: "משתמש נוצר בהצלחה.", token ,user});
+        res.status(201).send({ message: "משתמש נוצר בהצלחה.", token, user });
     } catch (error) {
-        console.error("Error during registration:", error); // לוג של השגיאה
-        res.status(500).send(error.message);
+        console.error("שגיאה ברישום:", error);
+        res.status(500).send("שגיאה פנימית בשרת.");
     }
 }
+
 function verifyToken(req, res, next) {
     const authHeader = req.headers.authorization;
     const token = authHeader && authHeader.split(" ")[1];

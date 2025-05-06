@@ -126,7 +126,7 @@ const RenterAccessories = () => {
                         label="Logout"
                         icon="pi pi-sign-out"
                         className="p-button-text"
-                        style={{ color: "#fff", fontWeight: "bold", marginTop: "0.5rem" }}
+                        style={{ color: "black", fontWeight: "bold", marginTop: "0.5rem" }}
                         onClick={() => {
                             localStorage.removeItem("token");
                             navigate("/login");
@@ -153,7 +153,9 @@ const RenterAccessories = () => {
             }}
         />
         <div style={{ padding: "1rem" }}>
-            <Button label="To add accessory" icon="pi pi-plus" onClick={() => setShowAddAccessory(true)} />
+            <Button
+             style={{ color: "black", fontWeight: "bold", marginTop: "0.5rem" }}
+            label="To add accessory" icon="pi pi-plus" onClick={() => setShowAddAccessory(true)} />
             <h1>Renter Accessories</h1>
             <div style={{ display: "flex", flexWrap: "wrap", gap: "1rem", justifyContent: "center" }}>
                 {accessories.map((accessory) => (
