@@ -1,65 +1,60 @@
 import { useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useDispatch } from "react-redux"; 
 import { saveUser } from "../Store/UserSlice"; 
-import { useNavigate } from "react-router-dom";
+import { Menubar } from "primereact/menubar";
+import { Button } from "primereact/button";
+import { InputText } from "primereact/inputtext";
 
 const RegisterPhotography = () => {
     const location = useLocation();
     const dispatch = useDispatch(); 
     const { name, email, password } = location.state || {};
-    const navigate=useNavigate()
+    const navigate = useNavigate();
 
     const [address, setAddress] = useState("");
     const [phone, setPhone] = useState("");
     const [photographyLink, setPhotographyLink] = useState("");
-    const [photographyGaleries, setPhotographyGaleries] = useState([{ name: 'new born', minPrice: 0, maxPrice: 0,images: [] }]); // מערך הגלריות עם שם, מחיר מינימלי ומחיר מקסימלי
+    const [photographyGaleries, setPhotographyGaleries] = useState([{ name: '', minPrice: '', maxPrice: '', images: [] }]);
     const [images, setImages] = useState([]);
-    const [selectedGalleryIndex, setSelectedGalleryIndex] = useState(0);
 
+    const galleryOptions = ['new born', 'challake', 'family'];
 
     const handleAddGallery = () => {
-        const newGalleryName = `Gallery ${photographyGaleries.length + 1}`;
-
-        // הוספת גלריה חדשה למערך photographyGaleries
         setPhotographyGaleries((prev) => [
             ...prev,
-            { name: newGalleryName, minPrice: 0, maxPrice: 0, images: [] },
+            { name: '', minPrice: '', maxPrice: '', images: [] },
         ]);
-
-        // עדכון שם הגלריה לכל התמונות שאין להן שם גלריה
-       
     };
+
     const handleImageChange = (event) => {
         const files = Array.from(event.target.files);
         setImages(prev => [...prev, ...files]);
-
-        const galleryImages = files.map(file => ({
-            link: URL.createObjectURL(file)
-        }));
-
-        setPhotographyGaleries(prev => {
-            const updated = [...prev];
-            updated[selectedGalleryIndex].images = [
-                ...updated[selectedGalleryIndex].images,
-                ...galleryImages
-            ];
-            return updated;
-        });
     };
 
-     // עדכון מחירים בגלריה נבחרת
-     const handlePriceChange = (e, field) => {
+    const handlePriceChange = (e, index, field) => {
         const value = e.target.value;
         setPhotographyGaleries((prevGaleries) =>
-            prevGaleries.map((gallery, index) =>
-                index === selectedGalleryIndex
+            prevGaleries.map((gallery, i) =>
+                i === index
                     ? { ...gallery, [field]: value }
                     : gallery
             )
         );
     };
+
+    const handleGalleryChange = (e, index) => {
+        const value = e.target.value;
+        setPhotographyGaleries((prevGaleries) =>
+            prevGaleries.map((gallery, i) =>
+                i === index
+                    ? { ...gallery, name: value, minPrice: '', maxPrice: '' }
+                    : gallery
+            )
+        );
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         const formData = new FormData();
@@ -103,81 +98,163 @@ const RegisterPhotography = () => {
         }
     };
 
+    const items = [
+        {
+            label: "Home",
+            icon: "pi pi-home",
+            command: () => navigate("/"),
+        },
+    ];
+
+    const start = (
+        <img
+            alt="logo"
+            src="https://sheviphoto.co.il/wp-content/uploads/2020/12/logo.png"
+            style={{ height: "50px", borderRadius: "50%" }}
+        />
+    );
 
     return (
-        <div>
-            <h1>Register as Photography</h1>
-            <p>Name: {name}</p>
-            <p>Email: {email}</p>
-            <p>Password: {password}</p>
-            <form onSubmit={handleSubmit}>
-                <div>
-                    <label htmlFor="address">Address:</label>
-                    <input
-                        type="text"
-                        id="address"
-                        value={address}
-                        onChange={(e) => setAddress(e.target.value)}
-                        required
-                    />
-                </div>
-                <div>
-                    <label htmlFor="phone">Phone:</label>
-                    <input
-                        type="tel"
-                        id="phone"
-                        value={phone}
-                        onChange={(e) => setPhone(e.target.value)}
-                        required
-                    />
-                </div>
-                <div>
-                    <label htmlFor="photographyLink">Photography Link:</label>
-                    <input
-                        type="text"
-                        id="photographyLink"
-                        value={photographyLink}
-                        onChange={(e) => setPhotographyLink(e.target.value)}
-                        required
-                    />
-                </div>
+        <div
+            style={{
+                height: "100vh",
+                display: "flex",
+                flexDirection: "column",
+                backgroundImage: "url('https://via.placeholder.com/1920x1080')",
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+            }}
+        >
+            <Menubar
+                model={items}
+                start={start}
+                style={{
+                    backgroundColor: "#008080",
+                    color: "white",
+                    borderBottom: "2px solid #005757",
+                    height: "100px",
+                }}
+            />
+            <div
+                style={{
+                    flex: 1,
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                }}
+            >
+                <div
+                    style={{
+                        width: "400px",
+                        padding: "2rem",
+                        background: "white",
+                        borderRadius: "8px",
+                        boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+                    }}
+                >
+                    <h1 style={{ textAlign: "center", marginBottom: "1.5rem", color: "#008080" }}>
+                        Register as Photography
+                    </h1>
+                    <form onSubmit={handleSubmit}>
+                        <div style={{ marginTop: "2rem", color: "#008080" }}>
+                            <p><strong>Name:</strong> {name}</p>
+                            <p><strong>Email:</strong> {email}</p>
+                            <p><strong>Password:</strong> {password}</p>
+                        </div>
+                        <div className="p-field" style={{ marginBottom: "1.5rem" }}>
+                            <label htmlFor="address" style={{ display: "block", marginBottom: "0.5rem", fontWeight: "bold", color: "#008080" }}>
+                                Address:
+                            </label>
+                            <InputText
+                                id="address"
+                                value={address}
+                                onChange={(e) => setAddress(e.target.value)}
+                                required
+                                className="p-inputtext-lg"
+                                style={{
+                                    width: "100%",
+                                    borderColor: "#008080",
+                                    outline: "none",
+                                    transition: "box-shadow 0.3s ease",
+                                }}
+                            />
+                        </div>
+                        <div className="p-field" style={{ marginBottom: "1.5rem" }}>
+                            <label htmlFor="phone" style={{ display: "block", marginBottom: "0.5rem", fontWeight: "bold", color: "#008080" }}>
+                                Phone:
+                            </label>
+                            <InputText
+                                id="phone"
+                                value={phone}
+                                onChange={(e) => setPhone(e.target.value)}
+                                required
+                                className="p-inputtext-lg"
+                                style={{
+                                    width: "100%",
+                                    borderColor: "#008080",
+                                    outline: "none",
+                                    transition: "box-shadow 0.3s ease",
+                                }}
+                            />
+                        </div>
+                        <div className="p-field" style={{ marginBottom: "1.5rem" }}>
+                            <label htmlFor="photographyLink" style={{ display: "block", marginBottom: "0.5rem", fontWeight: "bold", color: "#008080" }}>
+                                Photography Link:
+                            </label>
+                            <InputText
+                                id="photographyLink"
+                                value={photographyLink}
+                                onChange={(e) => setPhotographyLink(e.target.value)}
+                                required
+                                className="p-inputtext-lg"
+                                style={{
+                                    width: "100%",
+                                    borderColor: "#008080",
+                                    outline: "none",
+                                    transition: "box-shadow 0.3s ease",
+                                }}
+                            />
+                        </div>
 
-                <h3>Photography Galeries</h3>
-                {photographyGaleries.map((gallery, index) => (
-                    <div key={index}>
-                        <input
-                            type="text"
-                            placeholder="Gallery Name"
-                            value={gallery.name}
-                            onChange={(e) => {
-                                const updatedGaleries = [...photographyGaleries];
-                                updatedGaleries[index].name = e.target.value;
-                                setPhotographyGaleries(updatedGaleries);
-                            }}
-                        />
-                        <input
-                            type="number"
-                            placeholder="Minimum Price"
-                            value={gallery.minPrice}
-                            onChange={(e) => handlePriceChange(e, "minPrice")}
-                        />
-                        <input
-                            type="number"
-                            placeholder="Maximum Price"
-                            value={gallery.maxPrice}
-                            onChange={(e) => handlePriceChange(e, "maxPrice")}
-                        />
-                    </div>
-                ))}
-                <div>
-                    <label htmlFor="images">Upload Images:</label>
-                    <input type="file" id="images" multiple onChange={handleImageChange} />
+                        <h3 style={{ color: "#008080" }}>Photography Galeries</h3>
+                        {photographyGaleries.map((gallery, index) => (
+                            <div key={index} style={{ marginBottom: "1rem" }}>
+                                <select
+                                    value={gallery.name}
+                                    onChange={(e) => handleGalleryChange(e, index)}
+                                >
+                                    <option value="">Select Gallery</option>
+                                    {galleryOptions.map((option) => (
+                                        <option key={option} value={option}>{option}</option>
+                                    ))}
+                                </select>
+                                <InputText
+                                    type="number"
+                                    placeholder="Minimum Price"
+                                    value={gallery.minPrice}
+                                    onChange={(e) => handlePriceChange(e, index, "minPrice")}
+                                    style={{ marginBottom: "0.5rem" }}
+                                />
+                                <InputText
+                                    type="number"
+                                    placeholder="Maximum Price"
+                                    value={gallery.maxPrice}
+                                    onChange={(e) => handlePriceChange(e, index, "maxPrice")}
+                                    style={{ marginBottom: "0.5rem" }}
+                                />
+                            </div>
+                        ))}
+                        <div className="p-field" style={{ marginBottom: "1.5rem" }}>
+                            <label htmlFor="images" style={{ display: "block", marginBottom: "0.5rem", fontWeight: "bold", color: "#008080" }}>
+                                Upload Images:
+                            </label>
+                            <input type="file" id="images" multiple onChange={handleImageChange} />
+                        </div>
+                        <Button type="button" label="Add Gallery" onClick={handleAddGallery} className="p-button-secondary" />
+                        <Button type="submit" label="Register" icon="pi pi-user-plus" iconPos="left" className="p-button-lg p-button-rounded" style={{ marginTop: "1rem", backgroundColor: "#008080", borderColor: "#008080", color: "white", fontWeight: "bold" }} />
+                    </form>
                 </div>
-                <button type="button" onClick={handleAddGallery}>
-                    Add Gallery
-                </button>
-                <button type="submit">Register</button>
-            </form>
+            </div>
         </div>
     );
 };
