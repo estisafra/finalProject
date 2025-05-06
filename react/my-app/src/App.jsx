@@ -9,16 +9,16 @@ import SendEmails from './Components/SendEmails';
 const Home = lazy(() => import("./Components/Home"));
 const Login = lazy(() => import("./Components/Login"));
 const RegisterPhotography = lazy(() => import("./Components/RegisterPhotography"));
-const RenterHome = lazy(() => import("./Components/RenterHome"));
-const UserHome = lazy(() => import("./Components/UserHome"));
+const RenterHome = lazy(() => import("./Components/Renter/RenterHome"));
+const UserHome = lazy(() => import("./Components/User/UserHome"));
 const PhotographyHome = lazy(() => import("./Components/PhotographyHome"));
-const RenterAccessories = lazy(() => import("./Components/RenterAccessories"));
-const RenterRents = lazy(() => import("./Components/RenterRents"));
-const AddAccessory = lazy(() => import("./Components/AddAccessory"));
-const UserAccessory = lazy(() => import("./Components/UserAccessory"));
-const AccessoryDetails = lazy(() => import("./Components/AccessoryDetails"));
-const UserRents = lazy(() => import("./Components/UserRents"));
-const UserOrders = lazy(() => import("./Components/UserOrders"));
+const RenterAccessories = lazy(() => import("./Components/Renter/RenterAccessories"));
+const RenterRents = lazy(() => import("./Components/Renter/RenterRents"));
+const AddAccessory = lazy(() => import("./Components/Renter/AddAccessory"));
+const UserAccessory = lazy(() => import("./Components/User/UserAccessory"));
+const AccessoryDetails = lazy(() => import("./Components/User/AccessoryDetails"));
+const UserRents = lazy(() => import("./Components/User/UserRents"));
+const UserOrders = lazy(() => import("./Components/User/UserOrders"));
 const Register = lazy(() => import("./Components/Register"));
 function App() {
   
