@@ -118,7 +118,7 @@ const RenterHome = () => {
                         label="Update Profile"
                         icon="pi pi-user-edit"
                         className="p-button-text"
-                        style={{ color: "#fff", fontWeight: "bold", marginTop: "0.5rem" }}
+                        style={{ color: "black", fontWeight: "bold", marginTop: "0.5rem" }}
                         onClick={() => {
                             setUpdatedName(userName);
                             setEmail(updatedEmail);
@@ -131,7 +131,7 @@ const RenterHome = () => {
                         label="Logout"
                         icon="pi pi-sign-out"
                         className="p-button-text"
-                        style={{ color: "#fff", fontWeight: "bold", marginTop: "0.5rem" }}
+                        style={{ color: "black", fontWeight: "bold", marginTop: "0.5rem" }}
                         onClick={handleLogout}
                     />
                 </div>
@@ -164,7 +164,9 @@ const RenterHome = () => {
                     />
                 </div>
                 <div style={{ marginTop: "1rem" }}>
-                    <Button label="Save" onClick={handleUpdateProfile} />
+                    <Button 
+                    style={{ color: "black", fontWeight: "bold", marginTop: "0.5rem" }}
+                    label="Save" onClick={handleUpdateProfile} />
                 </div>
             </Dialog>
         </div>

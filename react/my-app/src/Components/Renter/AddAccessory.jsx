@@ -93,13 +93,7 @@ const handleSubmit = async (e) => {
                             type="submit" 
                             label="Add" 
                             icon="pi pi-check" 
-                            style={{
-                                width: "48%",
-                                backgroundColor: "transparent", // הפיכת הרקע לשקוף
-                                color: "#333", // טקסט כהה יותר
-                                border: "1px solid #333", // גבול כהה
-                                transition: "box-shadow 0.3s ease"
-                            }} 
+                            style={{ color: "black", fontWeight: "bold", marginTop: "0.5rem" }}
                             onFocus={(e) => (e.target.style.boxShadow = "0 0 5px #005757")}
                             onBlur={(e) => (e.target.style.boxShadow = "none")}
                         />
@@ -109,13 +103,7 @@ const handleSubmit = async (e) => {
                             icon="pi pi-times" 
                             onClick={onClose} 
                             className="p-button-secondary" 
-                            style={{
-                                width: "48%",
-                                backgroundColor: "transparent", // הפיכת הרקע לשקוף
-                                color: "#333", // טקסט כהה יותר
-                                border: "1px solid #333", // גבול כהה
-                                transition: "box-shadow 0.3s ease"
-                            }} 
+                            style={{ color: "black", fontWeight: "bold", marginTop: "0.5rem" }}
                             onFocus={(e) => (e.target.style.boxShadow = "0 0 5px #005757")}
                             onBlur={(e) => (e.target.style.boxShadow = "none")}
                         />
