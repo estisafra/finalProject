@@ -110,33 +110,36 @@ const Login = () => {
         e.preventDefault();
 
         const loginData = { name, email, password };
-
         try {
             const response = await axios.post("http://localhost:8080/System/login", loginData, {
                 headers: { "Content-Type": "application/json" },
             });
+             let myPhone = "", myAddress = "";  
 
-            let myName = "";
             switch (response.data.role) {
                 case "User":
-                    myName = response.data.user.userName;
+                    myAddress = response.data.user.userAddress;
+                    myPhone = response.data.user.userPhone;
                     break;
                 case "Renter":
-                    myName = response.data.user.renterName;
+                    myAddress = response.data.user.renterAddress;
+                    myPhone = response.data.user.renterPhone;
                     break;
                 case "Photography":
-                    myName = response.data.user.photographyName;
+                    myAddress = response.data.user.photographyAddress;
+                    myPhone = response.data.user.photographyPhone;
                     break;
             }
-
             dispatch(
                 saveUser({
-                    name: myName || name,
+                    name: name,
                     id: response.data.user._id,
                     role: response.data.role,
+                    email: email,
+                    phone:myPhone || phone,
+                    address: myAddress || address,
                 })
             );
-
             localStorage.setItem("token", response.data.token);
 
             if (response.data.role === "Renter") navigate("/renterHome");

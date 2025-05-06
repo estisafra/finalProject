@@ -49,6 +49,9 @@ const Register = () => {
                     name: name,
                     id: response.data.user._id,
                     role: registerData.userType,
+                    phone:phone,
+                    address: address,
+                    email:email,
                 })
             );
 

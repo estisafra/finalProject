@@ -2,7 +2,10 @@ import { createSlice } from "@reduxjs/toolkit";
 const initialValue={
     name:"User",
     id:"",
-    role:""
+    role:"",
+    address:"",
+    phone:"",
+    email:""
 }
 
 const UserSlice= createSlice({
@@ -13,6 +16,9 @@ const UserSlice= createSlice({
             state.name= action.payload.name
             state.id= action.payload.id
             state.role=action.payload.role
+            state.address=action.payload.address
+            state.phone=action.payload.phone
+            state.email=action.payload.email
         }
     }
 

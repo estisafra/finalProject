@@ -114,7 +114,10 @@ const RegisterPhotography = () => {
                 saveUser({
                     name: name,
                     id: response.data.user._id,
-                    role: "User",
+                    role: "Potography",
+                    phone: response.data.user.phone,
+                    address: response.data.user.address,
+                    image: response.data.user.image,
                 })
             );
     

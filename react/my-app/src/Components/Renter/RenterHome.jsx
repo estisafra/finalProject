@@ -1,20 +1,61 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { Menubar } from "primereact/menubar";
 import { Button } from "primereact/button";
+import { Dialog } from "primereact/dialog";
+import { InputText } from "primereact/inputtext";
 import "primereact/resources/themes/saga-blue/theme.css";
 import "primereact/resources/primereact.min.css";
 import "primeicons/primeicons.css";
 
 const RenterHome = () => {
     const navigate = useNavigate();
-    const userName = useSelector((state) => state.user.name); // Get the name from the slice
+    const userName = useSelector((state) => state.user.name);
+    const renterId = useSelector((state) => state.user.id);
+    const updatedEmail = useSelector((state) => state.user.email);
+    const updatedPhone = useSelector((state) => state.user.phone);
+    const updatedAddress = useSelector((state) => state.user.address);
+    
     const [showProfileMenu, setShowProfileMenu] = useState(false);
+    const [showUpdateDialog, setShowUpdateDialog] = useState(false);
+    const [updatedName, setUpdatedName] = useState(userName);
+    const [email, setEmail] = useState(updatedEmail);
+    const [phone, setPhone] = useState(updatedPhone);
+    const [address, setAddress] = useState(updatedAddress);
 
     const handleLogout = () => {
         localStorage.removeItem("token");
         navigate("/login");
+    };
+
+    const handleUpdateProfile = async () => {
+        try {
+            const response = await fetch(`http://localhost:8080/Renter/UpdatePersonalDetails/${renterId}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${localStorage.getItem("token")}`
+                },
+                body: JSON.stringify({
+                    id: renterId,
+                    name: updatedName,
+                    email: email,
+                    phone: phone,
+                    address: address
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error("Network response was not ok");
+            }
+
+            const data = await response.json();
+            console.log("Profile updated successfully:", data);
+            setShowUpdateDialog(false);
+        } catch (error) {
+            console.error("There was a problem with the fetch operation:", error);
+        }
     };
 
     const items = [
@@ -33,7 +74,7 @@ const RenterHome = () => {
     const start = (
         <img
             alt="logo"
-            src="https://sheviphoto.co.il/wp-content/uploads/2020/12/logo.png" // לוגו מהאתר
+            src="https://sheviphoto.co.il/wp-content/uploads/2020/12/logo.png"
             style={{ height: "50px", borderRadius: "50%" }}
         />
     );
@@ -74,6 +115,19 @@ const RenterHome = () => {
                 >
                     <p style={{ margin: 0, fontWeight: "bold" }}>{userName}</p>
                     <Button
+                        label="Update Profile"
+                        icon="pi pi-user-edit"
+                        className="p-button-text"
+                        style={{ color: "#fff", fontWeight: "bold", marginTop: "0.5rem" }}
+                        onClick={() => {
+                            setUpdatedName(userName);
+                            setEmail(updatedEmail);
+                            setPhone(updatedPhone);
+                            setAddress(updatedAddress);
+                            setShowUpdateDialog(true);
+                        }}
+                    />
+                    <Button
                         label="Logout"
                         icon="pi pi-sign-out"
                         className="p-button-text"
@@ -82,6 +136,37 @@ const RenterHome = () => {
                     />
                 </div>
             )}
+            <Dialog header="Update Profile" visible={showUpdateDialog} onHide={() => setShowUpdateDialog(false)}>
+                <div>
+                    <label htmlFor="name">Name:</label><br />
+                    <InputText
+                        id="name"
+                        value={updatedName}
+                        onChange={(e) => setUpdatedName(e.target.value)}
+                    /><br />
+                    <label htmlFor="email">Email:</label><br />
+                    <InputText
+                        id="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                    /><br />
+                    <label htmlFor="phone">Phone:</label><br />
+                    <InputText
+                        id="phone"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                    /><br />
+                    <label htmlFor="address">Address:</label><br />
+                    <InputText
+                        id="address"
+                        value={address}
+                        onChange={(e) => setAddress(e.target.value)}
+                    />
+                </div>
+                <div style={{ marginTop: "1rem" }}>
+                    <Button label="Save" onClick={handleUpdateProfile} />
+                </div>
+            </Dialog>
         </div>
     );
 
@@ -89,7 +174,7 @@ const RenterHome = () => {
         <div
             style={{
                 height: "100vh",
-                backgroundImage: "url('https://sheviphoto.co.il/wp-content/uploads/2020/12/IMG_20201215_134159-scaled.jpg')", // תמונה מהרקע באתר
+                backgroundImage: "url('https://sheviphoto.co.il/wp-content/uploads/2020/12/IMG_20201215_134159-scaled.jpg')",
                 backgroundSize: "cover",
                 backgroundPosition: "center",
                 display: "flex",
@@ -104,7 +189,7 @@ const RenterHome = () => {
                     backgroundColor: "#008080",
                     color: "white",
                     borderBottom: "2px solid #005757",
-                    height: "100px", // גובה מוגדל
+                    height: "100px",
                     width: "100%",
                 }}
             />
