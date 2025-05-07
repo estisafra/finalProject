@@ -32,6 +32,7 @@ const PhotographyModule = mongoose.Schema({
             message: props => `${props.value} הוא לא לינק חוקי!`
         }
     },
+    profile: { type: String } 
 });
 
 module.exports = mongoose.model("Photographies", PhotographyModule);

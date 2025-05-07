@@ -19,6 +19,7 @@ const RegisterPhotography = () => {
     const [photographyGaleries, setPhotographyGaleries] = useState([{ name: 'new born', minPrice: 0, maxPrice: 0, images: [] }]);
     const [images, setImages] = useState([]);
     const [selectedGalleryIndex, setSelectedGalleryIndex] = useState(0);
+    const[profil, setProfile] = useState("");
 
     const handleAddGallery = () => {
         const newGalleryName = `Gallery ${photographyGaleries.length + 1}`;
@@ -207,6 +208,24 @@ const RegisterPhotography = () => {
                                 id="photographyLink"
                                 value={photographyLink}
                                 onChange={(e) => setPhotographyLink(e.target.value)}
+                                required
+                                className="p-inputtext-lg"
+                                style={{
+                                    width: "100%",
+                                    borderColor: "#008080",
+                                    outline: "none",
+                                    transition: "box-shadow 0.3s ease",
+                                }}
+                            />
+                        </div>
+                        <div className="p-field" style={{ marginBottom: "1.5rem" }}>
+                            <label htmlFor="profil" style={{ display: "block", marginBottom: "0.5rem", fontWeight: "bold", color: "#008080" }}>
+                                Profile Description:
+                            </label>
+                            <InputText
+                                id="profil"
+                                value={profil}
+                                onChange={(e) => setProfile(e.target.value)}
                                 required
                                 className="p-inputtext-lg"
                                 style={{
