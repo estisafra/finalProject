@@ -16,40 +16,42 @@ const RegisterPhotography = () => {
     const [address, setAddress] = useState("");
     const [phone, setPhone] = useState("");
     const [photographyLink, setPhotographyLink] = useState("");
-    const [photographyGaleries, setPhotographyGaleries] = useState([{ name: '', minPrice: '', maxPrice: '', images: [] }]);
+    const [photographyGaleries, setPhotographyGaleries] = useState([{ name: 'new born', minPrice: 0, maxPrice: 0, images: [] }]);
     const [images, setImages] = useState([]);
-
-    const galleryOptions = ['new born', 'challake', 'family'];
+    const [selectedGalleryIndex, setSelectedGalleryIndex] = useState(0);
 
     const handleAddGallery = () => {
+        const newGalleryName = `Gallery ${photographyGaleries.length + 1}`;
         setPhotographyGaleries((prev) => [
             ...prev,
-            { name: '', minPrice: '', maxPrice: '', images: [] },
+            { name: newGalleryName, minPrice: 0, maxPrice: 0, images: [] },
         ]);
     };
 
     const handleImageChange = (event) => {
         const files = Array.from(event.target.files);
         setImages(prev => [...prev, ...files]);
+
+        const galleryImages = files.map(file => ({
+            link: URL.createObjectURL(file)
+        }));
+
+        setPhotographyGaleries(prev => {
+            const updated = [...prev];
+            updated[selectedGalleryIndex].images = [
+                ...updated[selectedGalleryIndex].images,
+                ...galleryImages
+            ];
+            return updated;
+        });
     };
 
-    const handlePriceChange = (e, index, field) => {
+    const handlePriceChange = (e, field) => {
         const value = e.target.value;
         setPhotographyGaleries((prevGaleries) =>
-            prevGaleries.map((gallery, i) =>
-                i === index
+            prevGaleries.map((gallery, index) =>
+                index === selectedGalleryIndex
                     ? { ...gallery, [field]: value }
-                    : gallery
-            )
-        );
-    };
-
-    const handleGalleryChange = (e, index) => {
-        const value = e.target.value;
-        setPhotographyGaleries((prevGaleries) =>
-            prevGaleries.map((gallery, i) =>
-                i === index
-                    ? { ...gallery, name: value, minPrice: '', maxPrice: '' }
                     : gallery
             )
         );
@@ -219,27 +221,29 @@ const RegisterPhotography = () => {
                         <h3 style={{ color: "#008080" }}>Photography Galeries</h3>
                         {photographyGaleries.map((gallery, index) => (
                             <div key={index} style={{ marginBottom: "1rem" }}>
-                                <select
+                                <InputText
+                                    type="text"
+                                    placeholder="Gallery Name"
                                     value={gallery.name}
-                                    onChange={(e) => handleGalleryChange(e, index)}
-                                >
-                                    <option value="">Select Gallery</option>
-                                    {galleryOptions.map((option) => (
-                                        <option key={option} value={option}>{option}</option>
-                                    ))}
-                                </select>
+                                    onChange={(e) => {
+                                        const updatedGaleries = [...photographyGaleries];
+                                        updatedGaleries[index].name = e.target.value;
+                                        setPhotographyGaleries(updatedGaleries);
+                                    }}
+                                    style={{ marginBottom: "0.5rem" }}
+                                />
                                 <InputText
                                     type="number"
                                     placeholder="Minimum Price"
                                     value={gallery.minPrice}
-                                    onChange={(e) => handlePriceChange(e, index, "minPrice")}
+                                    onChange={(e) => handlePriceChange(e, "minPrice")}
                                     style={{ marginBottom: "0.5rem" }}
                                 />
                                 <InputText
                                     type="number"
                                     placeholder="Maximum Price"
                                     value={gallery.maxPrice}
-                                    onChange={(e) => handlePriceChange(e, index, "maxPrice")}
+                                    onChange={(e) => handlePriceChange(e, "maxPrice")}
                                     style={{ marginBottom: "0.5rem" }}
                                 />
                             </div>
