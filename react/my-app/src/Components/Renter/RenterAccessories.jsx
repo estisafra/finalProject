@@ -6,6 +6,7 @@ import { Menubar } from "primereact/menubar";
 import { Toast } from "primereact/toast";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
+import { Calendar } from "primereact/calendar";
 import DeleteAccessory from "./DeleteAccessory";
 import AddAccessory from "./AddAccessory"; // ייבוא דיאלוג הוספת האביזר
 
@@ -15,6 +16,8 @@ const RenterAccessories = () => {
     const [deletingAccessoryId, setDeletingAccessoryId] = useState(null);
     const [showProfileMenu, setShowProfileMenu] = useState(false);
     const [isAccessoryAdded, setIsAccessoryAdded] = useState(false);
+    const [showOccupiedDatesDialog, setShowOccupiedDatesDialog] = useState(false); // שליטה על דיאלוג תאריכים תפוסים
+    const [occupiedDates, setOccupiedDates] = useState([]); // תאריכים תפוסים
     const id = useSelector((state) => state.user.id);
     const userName = useSelector((state) => state.user.name);
     const toast = useRef(null);
@@ -64,6 +67,29 @@ const RenterAccessories = () => {
             detail: message.detail,
             life: 3000,
         });
+    };
+
+    const handleShowOccupiedDates = async (accessoryId) => {
+        try {
+            const token = localStorage.getItem("token");
+            const currentDate = new Date();
+            const response = await axios.get("http://localhost:8080/Accessory/getOccupiedDates", {
+                params: {
+                    renterId: id,
+                    accessoryId,
+                    year: currentDate.getFullYear(),
+                    month: currentDate.getMonth(),
+                },
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            setOccupiedDates(response.data.map((date) => new Date(date)));
+            setShowOccupiedDatesDialog(true);
+        } catch (error) {
+            console.error("Error fetching occupied dates:", error);
+        }
     };
 
     const items = [
@@ -153,9 +179,20 @@ const RenterAccessories = () => {
             }}
         />
         <div style={{ padding: "1rem" }}>
-            <Button label="To add accessory" icon="pi pi-plus" onClick={() => setShowAddAccessory(true)} />
+            <Button 
+                label="To add accessory" 
+                icon="pi pi-plus" 
+                onClick={() => setShowAddAccessory(true)} 
+                style={{ color: "#005757" }} 
+            />
             <h1>Renter Accessories</h1>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "1rem", justifyContent: "center" }}>
+            <div style={{ 
+                display: "flex", 
+                flexWrap: "wrap", 
+                gap: "1rem", 
+                justifyContent: "flex-start", 
+                alignItems: "flex-start" 
+            }}>
                 {accessories.map((accessory) => (
                     <div
                         key={accessory.accessoryId || accessory.accessoryName}
@@ -180,13 +217,16 @@ const RenterAccessories = () => {
                             style={{ width: "100%", height: "150px", objectFit: "cover", borderRadius: "8px" }}
                         />
                         <Button
+                            label="Show Occupied Dates"
+                            icon="pi pi-calendar"
+                            className="p-button-text"
+                            onClick={() => handleShowOccupiedDates(accessory.accessoryId)}
+                            style={{ marginTop: "1rem", color: "#005757" }}
+                        />
+                        <Button
                             icon="pi pi-trash"
                             className="p-button-rounded p-button-danger"
-                            style={{
-                                position: "absolute",
-                                bottom: "10px",
-                                right: "10px",
-                            }}
+                            style={{ marginTop: "1rem", color: "#005757" }}
                             onClick={() => handleDelete(accessory.accessoryId)}
                         />
                     </div>
@@ -197,6 +237,45 @@ const RenterAccessories = () => {
         <Dialog header="Add Accessory" visible={showAddAccessory} onHide={() => setShowAddAccessory(false)}>
              <AddAccessory onClose={handleAddAccessory} />
        </Dialog>
+
+        <Dialog
+            header="Occupied Dates"
+            visible={showOccupiedDatesDialog}
+            style={{ width: "50vw" }}
+            onHide={() => setShowOccupiedDatesDialog(false)}
+            closeOnEscape
+            closeIcon={<i className="pi pi-times" style={{ color: "#005757" }}></i>}
+        >
+            <Calendar
+                inline
+                disabledDates={occupiedDates}
+                dateTemplate={(date) => {
+                    const isOccupied = occupiedDates.some(
+                        (occupiedDate) =>
+                            date.day === new Date(occupiedDate).getDate() &&
+                            date.month === new Date(occupiedDate).getMonth() &&
+                            date.year === new Date(occupiedDate).getFullYear()
+                    );
+
+                    return (
+                        <div
+                            style={{
+                                backgroundColor: isOccupied ? "#f44336" : "transparent",
+                                color: isOccupied ? "white" : "black",
+                                borderRadius: "50%",
+                                width: "2rem",
+                                height: "2rem",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                            }}
+                        >
+                            {date.day}
+                        </div>
+                    );
+                }}
+            />
+        </Dialog>
 
         {deletingAccessoryId && (
             <DeleteAccessory

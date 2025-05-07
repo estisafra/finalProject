@@ -23,6 +23,10 @@ const handleSubmit = async (e) => {
 
     const token = localStorage.getItem("token");
     try {
+        for (let pair of formData.entries()) {
+            console.log(`${pair[0]}:`, pair[1]);
+          }
+          
         console.log(formData.get("image")); // הדפסת התמונה לקונסול
         const response = await axios.put(`http://localhost:8080/Renter/addAccessory/${id}`, formData, {
             headers: {
@@ -66,7 +70,8 @@ const handleSubmit = async (e) => {
                          mode="basic"
                          accept="image/*"
                          maxFileSize={1000000} // 1MB
-                         onSelect={(e) => setImage(e.files[0])} // השתמש באירוע onSelect
+                         onSelect={(e) => setImage(e.originalEvent.files[0])}
+                
                          chooseLabel="Choose"
                          required
                          />
