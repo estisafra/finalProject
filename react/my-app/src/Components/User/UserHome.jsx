@@ -14,7 +14,7 @@ const UserHome = () => {
         {
             label: "Photographers",
             icon: "pi pi-camera",
-            command: () => navigate("/photographers"),
+            command: () => navigate("/AllPhotography"),
         },
        
         {
