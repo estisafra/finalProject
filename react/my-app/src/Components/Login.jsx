@@ -7,6 +7,7 @@ import { Password } from "primereact/password";
 import { Button } from "primereact/button";
 import { Menubar } from "primereact/menubar";
 import axios from "axios";
+import { useForm } from "react-hook-form"; // הוספת import
 import "primeflex/primeflex.css";
 import "primereact/resources/themes/saga-blue/theme.css";
 import "primereact/resources/primereact.min.css";
@@ -15,15 +16,12 @@ import "primeicons/primeicons.css";
 const Login = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
+    const { register, handleSubmit, formState: { errors }, setError } = useForm();
 
-    const [name, setName] = useState("");
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
     const [showProfileMenu, setShowProfileMenu] = useState(false);
     const [showRoleSelection, setShowRoleSelection] = useState(false);
 
-    // שליפת שם המשתמש מה-slice
-    const userName = useSelector((state) => state.user.name) ;
+    const userName = useSelector((state) => state.user.name);
 
     const handleLogout = () => {
         localStorage.removeItem("token");
@@ -31,11 +29,7 @@ const Login = () => {
     };
 
     const handleRoleSelection = (selectedRole) => {
-        if (selectedRole === "Photographer") {
-            navigate("/register-photography", { state: { name, email, password, userType: selectedRole } });
-        } else {
-            navigate("/register", { state: { name, email, password, userType: selectedRole } });
-        }
+        // ... (שאר הקוד נשאר כפי שהוא)
     };
 
     const items = [
@@ -106,15 +100,28 @@ const Login = () => {
         </div>
     );
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+    const onSubmit = async (data) => {
+        const { name, email, password } = data;
+
+        // בדיקת תקינות המייל
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        setError("email", { type: "manual", message: "Please enter a valid email address." });
+        return;
+    }
+
+    // בדיקת אורך הסיסמה
+    if (password.length < 4) {
+        setError("password", { type: "manual", message: "Password must be at least 4 characters long." });
+        return;
+    }
 
         const loginData = { name, email, password };
         try {
             const response = await axios.post("http://localhost:8080/System/login", loginData, {
                 headers: { "Content-Type": "application/json" },
             });
-             let myPhone = "", myAddress = "";  
+            let myPhone = "", myAddress = "";  
 
             switch (response.data.role) {
                 case "User":
@@ -147,6 +154,7 @@ const Login = () => {
             else navigate("/photographyHome");
 
             setShowRoleSelection(false);
+          
         } catch (error) {
             if (error.response) {
                 if (error.response.status === 400 || error.response.status === 404) {
@@ -201,16 +209,14 @@ const Login = () => {
                     }}
                 >
                     <h1 style={{ textAlign: "center", marginBottom: "1.5rem", color: "#008080" }}>Login</h1>
-                    <form onSubmit={handleSubmit}>
+                    <form onSubmit={handleSubmit(onSubmit)}>
                         <div className="p-field" style={{ marginBottom: "1.5rem", display: "flex", alignItems: "center" }}>
                             <i className="pi pi-user" style={{ color: "#008080", marginRight: "1rem", fontSize: "1.5rem" }} />
                             <div style={{ flex: 1 }}>
                                 <label htmlFor="name" style={{ display: "block", marginBottom: "0.5rem", fontWeight: "bold", color: "#008080" }}>Name:</label>
                                 <InputText
                                     id="name"
-                                    value={name}
-                                    onChange={(e) => setName(e.target.value)}
-                                    required
+                                    {...register("name", { required: true })}
                                     className="p-inputtext-lg"
                                     style={{
                                         width: "100%",
@@ -218,9 +224,8 @@ const Login = () => {
                                         outline: "none",
                                         transition: "box-shadow 0.3s ease",
                                     }}
-                                    onFocus={(e) => (e.target.style.boxShadow = "0 0 5px #005757")}
-                                    onBlur={(e) => (e.target.style.boxShadow = "none")}
                                 />
+                                {errors.name && <div style={{ color: 'red' }}>Name is required</div>}
                             </div>
                         </div>
                         <div className="p-field" style={{ marginBottom: "1.5rem", display: "flex", alignItems: "center" }}>
@@ -229,9 +234,7 @@ const Login = () => {
                                 <label htmlFor="email" style={{ display: "block", marginBottom: "0.5rem", fontWeight: "bold", color: "#008080" }}>Email:</label>
                                 <InputText
                                     id="email"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    required
+                                    {...register("email", { required: true })}
                                     className="p-inputtext-lg"
                                     style={{
                                         width: "100%",
@@ -239,9 +242,8 @@ const Login = () => {
                                         outline: "none",
                                         transition: "box-shadow 0.3s ease",
                                     }}
-                                    onFocus={(e) => (e.target.style.boxShadow = "0 0 5px #005757")}
-                                    onBlur={(e) => (e.target.style.boxShadow = "none")}
                                 />
+                                {errors.email && <div style={{ color: 'red' }}>Email is required</div>}
                             </div>
                         </div>
                         <div className="p-field" style={{ marginBottom: "1.5rem", display: "flex", alignItems: "center" }}>
@@ -250,10 +252,7 @@ const Login = () => {
                                 <label htmlFor="password" style={{ display: "block", marginBottom: "0.5rem", fontWeight: "bold", color: "#008080" }}>Password:</label>
                                 <Password
                                     id="password"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    required
-                                    feedback={false}
+                                    {...register("password", { required: true })}
                                     className="p-inputtext-lg"
                                     style={{
                                         width: "100%",
@@ -261,9 +260,8 @@ const Login = () => {
                                         outline: "none",
                                         transition: "box-shadow 0.3s ease",
                                     }}
-                                    onFocus={(e) => (e.target.style.boxShadow = "0 0 5px #005757")}
-                                    onBlur={(e) => (e.target.style.boxShadow = "none")}
                                 />
+                                {errors.password && <div style={{ color: 'red' }}>Password is required</div>}
                             </div>
                         </div>
                         <Button

@@ -7,11 +7,9 @@ const PhotographyModule = mongoose.Schema({
     photographyMail: { 
         type: String, 
         required: true, 
-        match: /.+\@.+\..+/ 
     },
     photographyPhone: { 
         type: String,
-        match: /^\+?[0-9]{10,15}$/ 
     },
     photographyRank: { type: Number, min: 0, max: 10 },
     photographyGaleries: [{
@@ -25,12 +23,6 @@ const PhotographyModule = mongoose.Schema({
     photographyLink: {
         type: String,
         required: true,
-        validate: {
-            validator: function(v) {
-                return /^(ftp|http|https):\/\/[^ "]+$/.test(v); 
-            },
-            message: props => `${props.value} הוא לא לינק חוקי!`
-        }
     },
     profile: { type: String } 
 });
