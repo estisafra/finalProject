@@ -5,9 +5,10 @@ import { saveUser } from "../Store/UserSlice";
 import { InputText } from "primereact/inputtext";
 import { Password } from "primereact/password";
 import { Button } from "primereact/button";
+import { Controller } from "react-hook-form";
 import { Menubar } from "primereact/menubar";
 import axios from "axios";
-import { useForm } from "react-hook-form"; // הוספת import
+import { useForm } from "react-hook-form";
 import "primeflex/primeflex.css";
 import "primereact/resources/themes/saga-blue/theme.css";
 import "primereact/resources/primereact.min.css";
@@ -16,7 +17,7 @@ import "primeicons/primeicons.css";
 const Login = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
-    const { register, handleSubmit, formState: { errors }, setError } = useForm();
+    const { register, handleSubmit, control, formState: { errors }, setError, getValues } = useForm();
 
     const [showProfileMenu, setShowProfileMenu] = useState(false);
     const [showRoleSelection, setShowRoleSelection] = useState(false);
@@ -29,7 +30,12 @@ const Login = () => {
     };
 
     const handleRoleSelection = (selectedRole) => {
-        // ... (שאר הקוד נשאר כפי שהוא)
+        const { name, email, password } = getValues(); 
+        if (selectedRole === "Photographer") {
+            navigate("/register-photography", { state: { name, email, password, userType: selectedRole } });
+        } else {
+            navigate("/register", { state: { name, email, password, userType: selectedRole } });
+        }
     };
 
     const items = [
@@ -103,22 +109,9 @@ const Login = () => {
     const onSubmit = async (data) => {
         const { name, email, password } = data;
 
-        // בדיקת תקינות המייל
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-        setError("email", { type: "manual", message: "Please enter a valid email address." });
-        return;
-    }
-
-    // // בדיקת אורך הסיסמה
-    // if (password.length < 4) {
-    //     setError("password", { type: "manual", message: "Password must be at least 4 characters long." });
-    //     return;
-    // }
 
         const loginData = { name, email, password };
         try {
-            console.log("Login data:", loginData); // הוספת לוג
             const response = await axios.post("http://localhost:8080/System/login", loginData, {
                 headers: { "Content-Type": "application/json" },
             });
@@ -234,16 +227,25 @@ const Login = () => {
                             <div style={{ flex: 1 }}>
                                 <label htmlFor="email" style={{ display: "block", marginBottom: "0.5rem", fontWeight: "bold", color: "#008080" }}>Email:</label>
                                 <InputText
-                                    id="email"
-                                    {...register("email", { required: true })}
-                                    className="p-inputtext-lg"
-                                    style={{
-                                        width: "100%",
-                                        borderColor: "#008080",
-                                        outline: "none",
-                                        transition: "box-shadow 0.3s ease",
-                                    }}
-                                />
+                                  id="email"
+                                  {...register("email", {
+                                  required: "Email is required",
+                                  pattern: {
+                                  value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                                  message: "Please enter a valid email address",
+                             },
+                  })}
+                        className="p-inputtext-lg"
+                        style={{
+                        width: "100%",
+                        borderColor: "#008080",
+                        outline: "none",
+                        transition: "box-shadow 0.3s ease",
+                       }}
+                    />
+                        {errors.email && (
+                        <div style={{ color: "red" }}>{errors.email.message}</div>
+                        )}
                                 {errors.email && <div style={{ color: 'red' }}>Email is required</div>}
                             </div>
                         </div>
@@ -251,32 +253,38 @@ const Login = () => {
                             <i className="pi pi-lock" style={{ color: "#008080", marginRight: "1rem", fontSize: "1.5rem" }} />
                             <div style={{ flex: 1 }}>
                                 <label htmlFor="password" style={{ display: "block", marginBottom: "0.5rem", fontWeight: "bold", color: "#008080" }}>Password:</label>
-                                <Password
-    id="password"
-    {...register("password", { 
-        required: "Password is required", 
-        minLength: {
-            value: 4,
-            message: "Password must be at least 4 characters long",
-        },
-    })}
-    feedback={false} // ביטול משוב חוזק הסיסמה
-    className="p-inputtext-lg"
-    style={{
-        width: "100%",
-        borderColor: "#008080",
-        outline: "none",
-        transition: "box-shadow 0.3s ease",
-    }}
-    onFocus={(e) => (e.target.style.boxShadow = "0 0 5px #005757")}
-    onBlur={(e) => (e.target.style.boxShadow = "none")}
-/>
-{errors.password && (
-    <div style={{ color: "red" }}>
-        {errors.password.message} 
-    </div>
-)}
-            </div>
+                                <Controller
+                                  name="password"
+                                  control={control}
+                                  rules={{
+                                  required: "Password is required",
+                                  minLength: {
+                                   value: 4,
+                                  message: "Password must be at least 4 characters long",
+                                  },
+                                 }}
+                               render={({ field }) => (
+                               <div>
+                                 <Password
+                                 {...field}
+                                 feedback={false}
+                                 className="p-inputtext-lg"
+                                style={{
+                                 width: "100%",
+                                 borderColor: "#008080",
+                                 outline: "none",
+                                 transition: "box-shadow 0.3s ease",
+                                 }}
+                                  onFocus={(e) => (e.target.style.boxShadow = "0 0 5px #005757")}
+                                  onBlur={(e) => (e.target.style.boxShadow = "none")}
+                                />
+                                {errors.password && (
+                                <div style={{ color: "red" }}>{errors.password.message}</div>
+                               )}
+                            </div>
+                           )}
+                         />
+                         </div>
                         </div>
                         <Button
                             type="submit"

@@ -72,7 +72,7 @@ const UserAccessory = () => {
         {
             label: "Photographers",
             icon: "pi pi-camera",
-            command: () => navigate("/photographers"),
+            command: () => navigate("/AllPhotography"),
         },
         {
             label: "Orders",
