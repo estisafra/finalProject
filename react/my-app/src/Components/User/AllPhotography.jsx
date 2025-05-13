@@ -8,8 +8,8 @@ import { useSelector } from "react-redux";
 const AllPhotography = () => {
     const navigate = useNavigate();
     const [photographers, setPhotographers] = useState([]);
-    const userName = useSelector((state) => state.user.name); // שם המשתמש
-    const [showProfileMenu, setShowProfileMenu] = useState(false); // שליטה על תפריט הפרופיל
+    const userName = useSelector((state) => state.user.name);
+    const [showProfileMenu, setShowProfileMenu] = useState(false);
 
     useEffect(() => {
         const fetchPhotographers = async () => {
@@ -118,14 +118,15 @@ const AllPhotography = () => {
             <div style={{ padding: "2rem", display: "flex", flexWrap: "wrap", gap: "1rem", justifyContent: "center" }}>
                 {photographers.map((photographer) => (
                     <Card
-                        key={photographer._id}
-                        title={photographer.photographyName}
-                        subTitle={photographer.photographyAddress}
-                        style={{ width: "300px", boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)", borderRadius: "8px" }}
-                        header={<img alt="Photographer" src="/public/img/p1.jpg" style={{ width: "100%", borderRadius: "8px 8px 0 0" }} />}
-                    >
-                        <p style={{ margin: 0, color: "#555" }}>{photographer.profileDescription}</p>
-                    </Card>
+                    key={photographer._id}
+                    title={photographer.photographyName}
+                    subTitle={photographer.photographyAddress}
+                    style={{ width: "300px", boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)", borderRadius: "8px" }}
+                    header={<img alt="Photographer" src="/public/img/p1.jpg" style={{ width: "100%", borderRadius: "8px 8px 0 0" }} />}
+                    onClick={() => navigate(`/photographerDetails`, { state: { name:photographer.photographyName } })}
+                >
+                    <p style={{ margin: 0,color: "#555"}}>profil{photographer.profile}</p>
+                </Card>
                 ))}
             </div>
         </div>

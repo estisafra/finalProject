@@ -291,7 +291,7 @@ const RegisterPhotography = () => {
                            id="image"
                            mode="basic"
                            accept="image/*"
-                           maxFileSize={100000000} // 1MB
+                           maxFileSize={100000000} 
                            onSelect={(e) => {
                            const files = Array.from(e.files);
                          setImages(prev => [...prev, ...files]);

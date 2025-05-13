@@ -21,6 +21,10 @@ const UserRents = lazy(() => import("./Components/User/UserRents"));
 const UserOrders = lazy(() => import("./Components/User/UserOrders"));
 const Register = lazy(() => import("./Components/Register"));
 const AllPhotography = lazy(() => import("./Components/User/AllPhotography"));
+const PhotographerDetails = lazy(() => import("./Components/User/photographerDetails"));
+const Gallery = lazy(() => import("./Components/User/gallery"));
+
+
 function App() {
   
   return (
@@ -42,6 +46,9 @@ function App() {
         <Route path="/userOrders" element={<UserOrders/>}/>
         <Route path="/register" element={<Register />} />
         <Route path="/allPhotography" element={<AllPhotography />} />
+        <Route path="/photographerDetails" element={<PhotographerDetails />} />
+        <Route path="/gallery" element={<Gallery />} />
+
       </Routes>
       <SendEmails/>
     </Suspense>
