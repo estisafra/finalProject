@@ -7,7 +7,7 @@ import { Password } from "primereact/password";
 import { Button } from "primereact/button";
 import { Menubar } from "primereact/menubar";
 import axios from "axios";
-import { useForm } from "react-hook-form"; // הוספת import
+import { useForm } from "react-hook-form";
 import "primeflex/primeflex.css";
 import "primereact/resources/themes/saga-blue/theme.css";
 import "primereact/resources/primereact.min.css";
@@ -29,7 +29,11 @@ const Login = () => {
     };
 
     const handleRoleSelection = (selectedRole) => {
-        // ... (שאר הקוד נשאר כפי שהוא)
+        if (selectedRole === "Photographer") {
+            navigate("/register-photography", { state: { name, email, password, userType: selectedRole } });
+        } else {
+            navigate("/register", { state: { name, email, password, userType: selectedRole } });
+        }
     };
 
     const items = [
@@ -254,13 +258,13 @@ const Login = () => {
                                 <Password
     id="password"
     {...register("password", { 
-        required: "Password is required", 
-        minLength: {
-            value: 4,
-            message: "Password must be at least 4 characters long",
-        },
+        required: true,
+        // minLength: {
+        //     value: 4,
+        //     message: "Password must be at least 4 characters long",
+        // },
     })}
-    feedback={false} // ביטול משוב חוזק הסיסמה
+    feedback={false}
     className="p-inputtext-lg"
     style={{
         width: "100%",
@@ -271,11 +275,8 @@ const Login = () => {
     onFocus={(e) => (e.target.style.boxShadow = "0 0 5px #005757")}
     onBlur={(e) => (e.target.style.boxShadow = "none")}
 />
-{errors.password && (
-    <div style={{ color: "red" }}>
-        {errors.password.message} 
-    </div>
-)}
+{errors.password && <div style={{ color: 'red' }}>{errors.password.message}</div>}
+
             </div>
                         </div>
                         <Button

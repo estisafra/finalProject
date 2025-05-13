@@ -14,10 +14,10 @@
     "axios": "^1.8.4",
     "primeflex": "^4.0.0",
     "primeicons": "^7.0.0",
-    "primereact": "^10.9.4",
+    "primereact": "^10.9.5",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-hook-form": "^7.56.0",
+    "react-hook-form": "^7.56.3",
     "react-redux": "^9.2.0",
     "react-router-dom": "^7.4.1"
   },
