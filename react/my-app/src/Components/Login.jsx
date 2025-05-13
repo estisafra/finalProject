@@ -110,14 +110,15 @@ const Login = () => {
         return;
     }
 
-    // בדיקת אורך הסיסמה
-    if (password.length < 4) {
-        setError("password", { type: "manual", message: "Password must be at least 4 characters long." });
-        return;
-    }
+    // // בדיקת אורך הסיסמה
+    // if (password.length < 4) {
+    //     setError("password", { type: "manual", message: "Password must be at least 4 characters long." });
+    //     return;
+    // }
 
         const loginData = { name, email, password };
         try {
+            console.log("Login data:", loginData); // הוספת לוג
             const response = await axios.post("http://localhost:8080/System/login", loginData, {
                 headers: { "Content-Type": "application/json" },
             });
@@ -251,18 +252,31 @@ const Login = () => {
                             <div style={{ flex: 1 }}>
                                 <label htmlFor="password" style={{ display: "block", marginBottom: "0.5rem", fontWeight: "bold", color: "#008080" }}>Password:</label>
                                 <Password
-                                    id="password"
-                                    {...register("password", { required: true })}
-                                    className="p-inputtext-lg"
-                                    style={{
-                                        width: "100%",
-                                        borderColor: "#008080",
-                                        outline: "none",
-                                        transition: "box-shadow 0.3s ease",
-                                    }}
-                                />
-                                {errors.password && <div style={{ color: 'red' }}>Password is required</div>}
-                            </div>
+    id="password"
+    {...register("password", { 
+        required: "Password is required", 
+        minLength: {
+            value: 4,
+            message: "Password must be at least 4 characters long",
+        },
+    })}
+    feedback={false} // ביטול משוב חוזק הסיסמה
+    className="p-inputtext-lg"
+    style={{
+        width: "100%",
+        borderColor: "#008080",
+        outline: "none",
+        transition: "box-shadow 0.3s ease",
+    }}
+    onFocus={(e) => (e.target.style.boxShadow = "0 0 5px #005757")}
+    onBlur={(e) => (e.target.style.boxShadow = "none")}
+/>
+{errors.password && (
+    <div style={{ color: "red" }}>
+        {errors.password.message} 
+    </div>
+)}
+            </div>
                         </div>
                         <Button
                             type="submit"
