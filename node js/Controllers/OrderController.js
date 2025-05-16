@@ -18,18 +18,20 @@ async function createOrder(req, res) {
         if (!isAvailable) {
             return res.status(400).send("הצלמת לא פנויה בתאריך זה.");
         }
-        let order = new Order({
-            orderDate: req.body.orderDate,
-            orderUser: req.body.orderUser,
-            orderPhotography: req.body.orderPhotography
+     let order = new Order({
+    orderDate: new Date(req.body.orderDate), // המרה לתאריך תקני
+    orderUser: req.body.orderUser,
+    orderPhotography: req.body.orderPhotography
         });
         await order.save();
+        console.log(order);
         // הוספת ההזמנה למשתמש
         await User.findByIdAndUpdate(req.body.orderUser, { $push: { userOrders: order._id } });
         // הוספת ההזמנה לצילום
         await Photography.findByIdAndUpdate(req.body.orderPhotography, { $push: { photographyOrders: order._id } });
         res.status(201).send(order);
     } catch (error) {
+        console.error(error);
         res.status(400).send(error.message);
     }
 }
@@ -40,9 +42,18 @@ async function deleteOrder(req, res) {
         const order = await Order.findByIdAndDelete(req.params.id);
         if (!order) {
             return res.status(404).send("ההזמנה לא נמצאה.");
-        }       
+        }
+
         // הסרת ההזמנה מהמשתמש
-        await User.findByIdAndUpdate(order.orderUser, { $pull: { userOrders: order._id } });
+        await User.findByIdAndUpdate(order.orderUser, {
+            $pull: { userOrders: order._id }
+        });
+
+        // הסרת ההזמנה מהצלם
+        await Photography.findByIdAndUpdate(order.orderPhotography, {
+            $pull: { photographyOrders: order._id }
+        });
+
         res.status(200).send("ההזמנה נמחקה בהצלחה.");
     } catch (error) {
         res.status(400).send(error.message);

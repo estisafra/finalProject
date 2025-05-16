@@ -127,33 +127,41 @@ async function matchPhotography(req, res) {
 }
 
 async function getAvailableDates(req, res) {
-    const { photographyId } = req.params; // מזהה הצלמת מהפרמטרים
-    const { month, year } = req.body; // חודש ושנה מהגוף של הבקשה
+    const { photographyId } = req.params;
+    let { month, year } = req.query;
 
     try {
+        // ודא ששני הספרות של החודש תמיד בפורמט תקני
+        month = month.toString().padStart(2, '0');
+
         // חיפוש הזמנות של הצלמת בחודש ובשנה שנבחרו
+        const monthStart = moment(`${year}-${month}-01`, "YYYY-MM-DD").startOf('month').toDate();
+        const monthEnd = moment(`${year}-${month}-01`, "YYYY-MM-DD").endOf('month').toDate();
+
         const orders = await Orders.find({
             orderPhotography: photographyId,
             orderDate: {
-                $gte: moment(`${year}-${month}-01`).startOf('month').toDate(),
-                $lt: moment(`${year}-${month}-01`).endOf('month').toDate()
+                $gte: monthStart,
+                $lt: monthEnd
             }
         });
 
         // יצירת מערך של כל התאריכים בחודש המבוקש
         const daysInMonth = moment(`${year}-${month}`, "YYYY-MM").daysInMonth();
-        const allDates = Array.from({ length: daysInMonth }, (_, i) => moment(`${year}-${month}-${i + 1}`).toDate());
+        const allDates = Array.from({ length: daysInMonth }, (_, i) => {
+            const dayStr = (i + 1).toString().padStart(2, '0');
+            return moment(`${year}-${month}-${dayStr}`, "YYYY-MM-DD").toDate();
+        });
 
         // סינון התאריכים הפנויים
-        const bookedDates = orders.map(order => order.orderDate.toISOString().split('T')[0]); // קבלת תאריכים שהוזמנו
+        const bookedDates = orders.map(order => order.orderDate.toISOString().split('T')[0]);
         const availableDates = allDates.filter(date => !bookedDates.includes(date.toISOString().split('T')[0]));
 
-        return res.status(200).send(availableDates); // החזרת התאריכים הפנויים
+        return res.status(200).send(availableDates);
     } catch (error) {
-        return res.status(500).send(error.message); // טיפול בשגיאות
+        return res.status(500).send(error.message);
     }
 }
-
 module.exports = {
     createPhotography,
     getAllPhotography,

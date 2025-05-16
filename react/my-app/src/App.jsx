@@ -21,7 +21,7 @@ const UserRents = lazy(() => import("./Components/User/UserRents"));
 const UserOrders = lazy(() => import("./Components/User/UserOrders"));
 const Register = lazy(() => import("./Components/Register"));
 const AllPhotography = lazy(() => import("./Components/User/AllPhotography"));
-const PhotographerDetails = lazy(() => import("./Components/User/photographerDetails"));
+const PhotographerDetails = lazy(() => import("./Components/User/PhotographerDetails"));
 const Gallery = lazy(() => import("./Components/User/gallery"));
 
 

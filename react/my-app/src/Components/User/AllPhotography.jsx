@@ -124,7 +124,7 @@ const AllPhotography = () => {
                     style={{ width: "300px", boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)", borderRadius: "8px" }}
                     header={<img alt="Photographer" src="/public/img/p1.jpg" style={{ width: "100%", borderRadius: "8px 8px 0 0" }} />}
                     onClick={() => navigate(`/photographerDetails`, { state: { name:photographer.photographyName } })}
-                >
+                 >
                     <p style={{ margin: 0,color: "#555"}}>profil{photographer.profile}</p>
                 </Card>
                 ))}
